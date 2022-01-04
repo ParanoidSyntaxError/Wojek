@@ -1275,6 +1275,8 @@ contract Wojek is ERC721Enumerable, Ownable
 
     uint256 private constant _traitCount = 10;
 
+    uint256 private constant _hashLength = 39;
+
     string private constant _svgHeader = "<svg id='wojek-svg' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 50 50' transform='scale(1,1)'>";
     string private constant _svgStyles = string(abi.encodePacked
     (
@@ -1294,6 +1296,7 @@ contract Wojek is ERC721Enumerable, Ownable
         ".w12{fill:#00ffff}", //Cyan
         ".w13{fill:#00ff00}", //Green
         "</style>"
+        //w99 = Skin tone
     ));
 
     Attribute[][] private _attributes;
@@ -1305,6 +1308,9 @@ contract Wojek is ERC721Enumerable, Ownable
         for(uint256 i = 0; i < _traitCount; i++)
         {
             _attributes.push();
+
+            //Debug attributes
+            _attributes[i].push(Attribute("", "White", "<rect class='w01'x='00'y='00'width='50'height='50'/>"));
         }
 
         /*
@@ -1389,7 +1395,7 @@ contract Wojek is ERC721Enumerable, Ownable
         */
     }
 
-    /* Hashing standard
+    /* Hashing standard (hash indexes reads left to right)
     --------------------
         Background  0
         Character   1
@@ -1403,13 +1409,126 @@ contract Wojek is ERC721Enumerable, Ownable
         Accessory   9
 
         Phunked     10
-        Series      11
+
+        Id          11
+        Series      12
     */
 
-    //000000000000000000000000000000
+    //10 - 000000000000000000000000000000
+    //11 - 000000000000000000000000000000000
+    //12 - 000000000000000000000000000000000000
+    //13 - 000000000000000000000000000000000000000
+
+    //Mint
+    //Lock supply
+
+    function mint() public returns (bool)
+    {
+        string memory hash = "000000000000000000000000000000000001001";
+
+        _tokens[hashTokenIndex(hash)] = hash;
+
+        _safeMint(msg.sender, totalSupply() + 1);
+
+        return true;
+    }
+
+    function hashExists(string memory hash) public view returns (bool)
+    {
+        if(WojekHelper.stringLength(_tokens[hashTokenIndex(hash)]) != _hashLength)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    function hashId(string memory hash) public pure  returns (uint256)
+    {
+        return WojekHelper.parseInt(WojekHelper.substring(hash, 11 * 3, 11 * 3 + 3));
+    }
+
+    function hashTokenIndex(string memory hash) public pure returns (uint256)
+    {
+        //Drop id and series to avoid duplicated attributes
+        return WojekHelper.parseInt(WojekHelper.substring(hash, 0, _hashLength - 6));
+    }
+
+    function hashMintable(string memory hash) public view returns (bool)
+    {
+        if(WojekHelper.stringLength(hash) != _hashLength || hashExists(hash))
+        {
+            return false;
+        }
+
+        for(uint256 i = 0; i < _traitCount; i++) 
+        {
+            uint256 attributeIndex = WojekHelper.parseInt(WojekHelper.substring(hash, i * 3, i * 3 + 3));
+
+            if(attributeIndex >= _attributes[i].length)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function tokenURI(uint256 id) public view override returns (string memory)
+    {
+        require (_exists(id));
+
+        string memory hash = _tokens[id];
+
+        string memory uri = string(abi.encodePacked
+        (
+            "data:application/json;base64,",
+            WojekHelper.encode
+            (
+                bytes(string(abi.encodePacked
+                (
+                    '{"name": "Wojek #',
+                    hashId(hash),
+                    '","description": "',
+                    "Wojek's display a wide variety of emotions, even the feelsbad ones.", 
+                    '","image": "data:image/svg+xml;base64,',
+                    WojekHelper.encode(bytes(generateSvg(hash))),
+                    '","attributes":',
+                    hashMetadata(hash),
+                    "}"
+                )))
+            )
+        ));
+
+        return uri;
+    }
+
+    function hashMetadata(string memory hash) public view returns(string memory)
+    {
+        string memory metadata;
+
+        for(uint256 i = 0; i < _traitCount; i++) 
+        {
+            uint256 attributeIndex = WojekHelper.parseInt(WojekHelper.substring(hash, i * 3, i * 3 + 3));
+
+            metadata = string(abi.encodePacked
+            (
+                metadata,
+                '{"trait_type":"',
+                _attributes[i][attributeIndex].trait,
+                '","value":"',
+                _attributes[i][attributeIndex].value,
+                '"}'
+            ));
+        }
+
+        return string(abi.encodePacked("[", metadata, "]"));
+    }
 
     function generateSvg(string memory hash) public view returns(string memory) 
     {
+        require(hashMintable(hash));
+
         string memory svg = string(abi.encodePacked(_svgHeader, _svgStyles));
 
         for(uint256 i = 0; i < _traitCount; i++) 
