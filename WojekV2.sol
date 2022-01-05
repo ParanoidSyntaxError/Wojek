@@ -985,157 +985,6 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     ) internal virtual {}
 }
 
-abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
-    // Mapping from owner to list of owned token IDs
-    mapping(address => mapping(uint256 => uint256)) private _ownedTokens;
-
-    // Mapping from token ID to index of the owner tokens list
-    mapping(uint256 => uint256) private _ownedTokensIndex;
-
-    // Array with all token ids, used for enumeration
-    uint256[] private _allTokens;
-
-    // Mapping from token id to position in the allTokens array
-    mapping(uint256 => uint256) private _allTokensIndex;
-
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC721) returns (bool) {
-        return interfaceId == type(IERC721Enumerable).interfaceId || super.supportsInterface(interfaceId);
-    }
-
-    /**
-     * @dev See {IERC721Enumerable-tokenOfOwnerByIndex}.
-     */
-    function tokenOfOwnerByIndex(address owner, uint256 index) public view virtual override returns (uint256) {
-        require(index < ERC721.balanceOf(owner), "ERC721Enumerable: owner index out of bounds");
-        return _ownedTokens[owner][index];
-    }
-
-    /**
-     * @dev See {IERC721Enumerable-totalSupply}.
-     */
-    function totalSupply() public view virtual override returns (uint256) {
-        return _allTokens.length;
-    }
-
-    /**
-     * @dev See {IERC721Enumerable-tokenByIndex}.
-     */
-    function tokenByIndex(uint256 index) public view virtual override returns (uint256) {
-        require(index < ERC721Enumerable.totalSupply(), "ERC721Enumerable: global index out of bounds");
-        return _allTokens[index];
-    }
-
-    /**
-     * @dev Hook that is called before any token transfer. This includes minting
-     * and burning.
-     *
-     * Calling conditions:
-     *
-     * - When `from` and `to` are both non-zero, ``from``'s `tokenId` will be
-     * transferred to `to`.
-     * - When `from` is zero, `tokenId` will be minted for `to`.
-     * - When `to` is zero, ``from``'s `tokenId` will be burned.
-     * - `from` cannot be the zero address.
-     * - `to` cannot be the zero address.
-     *
-     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-     */
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override {
-        super._beforeTokenTransfer(from, to, tokenId);
-
-        if (from == address(0)) {
-            _addTokenToAllTokensEnumeration(tokenId);
-        } else if (from != to) {
-            _removeTokenFromOwnerEnumeration(from, tokenId);
-        }
-        if (to == address(0)) {
-            _removeTokenFromAllTokensEnumeration(tokenId);
-        } else if (to != from) {
-            _addTokenToOwnerEnumeration(to, tokenId);
-        }
-    }
-
-    /**
-     * @dev Private function to add a token to this extension's ownership-tracking data structures.
-     * @param to address representing the new owner of the given token ID
-     * @param tokenId uint256 ID of the token to be added to the tokens list of the given address
-     */
-    function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
-        uint256 length = ERC721.balanceOf(to);
-        _ownedTokens[to][length] = tokenId;
-        _ownedTokensIndex[tokenId] = length;
-    }
-
-    /**
-     * @dev Private function to add a token to this extension's token tracking data structures.
-     * @param tokenId uint256 ID of the token to be added to the tokens list
-     */
-    function _addTokenToAllTokensEnumeration(uint256 tokenId) private {
-        _allTokensIndex[tokenId] = _allTokens.length;
-        _allTokens.push(tokenId);
-    }
-
-    /**
-     * @dev Private function to remove a token from this extension's ownership-tracking data structures. Note that
-     * while the token is not assigned a new owner, the `_ownedTokensIndex` mapping is _not_ updated: this allows for
-     * gas optimizations e.g. when performing a transfer operation (avoiding double writes).
-     * This has O(1) time complexity, but alters the order of the _ownedTokens array.
-     * @param from address representing the previous owner of the given token ID
-     * @param tokenId uint256 ID of the token to be removed from the tokens list of the given address
-     */
-    function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId) private {
-        // To prevent a gap in from's tokens array, we store the last token in the index of the token to delete, and
-        // then delete the last slot (swap and pop).
-
-        uint256 lastTokenIndex = ERC721.balanceOf(from) - 1;
-        uint256 tokenIndex = _ownedTokensIndex[tokenId];
-
-        // When the token to delete is the last token, the swap operation is unnecessary
-        if (tokenIndex != lastTokenIndex) {
-            uint256 lastTokenId = _ownedTokens[from][lastTokenIndex];
-
-            _ownedTokens[from][tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
-            _ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
-        }
-
-        // This also deletes the contents at the last position of the array
-        delete _ownedTokensIndex[tokenId];
-        delete _ownedTokens[from][lastTokenIndex];
-    }
-
-    /**
-     * @dev Private function to remove a token from this extension's token tracking data structures.
-     * This has O(1) time complexity, but alters the order of the _allTokens array.
-     * @param tokenId uint256 ID of the token to be removed from the tokens list
-     */
-    function _removeTokenFromAllTokensEnumeration(uint256 tokenId) private {
-        // To prevent a gap in the tokens array, we store the last token in the index of the token to delete, and
-        // then delete the last slot (swap and pop).
-
-        uint256 lastTokenIndex = _allTokens.length - 1;
-        uint256 tokenIndex = _allTokensIndex[tokenId];
-
-        // When the token to delete is the last token, the swap operation is unnecessary. However, since this occurs so
-        // rarely (when the last minted token is burnt) that we still do the swap here to avoid the gas cost of adding
-        // an 'if' statement (like in _removeTokenFromOwnerEnumeration)
-        uint256 lastTokenId = _allTokens[lastTokenIndex];
-
-        _allTokens[tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
-        _allTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
-
-        // This also deletes the contents at the last position of the array
-        delete _allTokensIndex[tokenId];
-        _allTokens.pop();
-    }
-}
-
 library WojekHelper
 {
     string internal constant TABLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -1264,7 +1113,7 @@ library WojekHelper
     }
 }
 
-contract Wojek is ERC721Enumerable, Ownable
+contract Wojek is ERC721, Ownable
 {
     struct Attribute 
     {
@@ -1275,9 +1124,9 @@ contract Wojek is ERC721Enumerable, Ownable
 
     uint256 private constant _traitCount = 10;
 
-    uint256 private constant _hashLength = 39;
+    uint256 private constant _hashLength = 33;
 
-    string private constant _svgHeader = "<svg id='wojek-svg' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 50 50' transform='scale(1,1)'>";
+    string private constant _svgHeader = "<svg id='wojek-svg' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 50 50' transform='scale(";
     string private constant _svgStyles = string(abi.encodePacked
     (
         "<style>#wojek-svg{shape-rendering: crispedges;}",
@@ -1300,8 +1149,10 @@ contract Wojek is ERC721Enumerable, Ownable
     ));
 
     Attribute[][] private _attributes;
-    mapping(uint256 => string) private _tokenHashes;    //Index => Hash
-    mapping(uint256 => uint256) private _tokenIndexes;  //Id => Index
+    mapping(uint256 => bool) public _mintedTokens;           
+    mapping(uint256 => uint256) public _tokenHashes;  //Id => Hash
+
+    uint256 private _totalSupply;
 
     uint256 private _currentSeries;
 
@@ -1314,10 +1165,10 @@ contract Wojek is ERC721Enumerable, Ownable
 
             //Debug attributes
             _attributes[i].push(Attribute("", "White", "<rect class='w01' x='00' y='00' width='50' height='50'/>"));
+            _attributes[i].push(Attribute("", "Cyan", "<rect class='w12' x='00' y='00' width='50' height='50'/>"));
         }
 
         /*
-
         Backgrounds
         [ 
             ["", "White", "<rect class='w01' x='00' y='00' width='50' height='50'/>"],
@@ -1410,137 +1261,86 @@ contract Wojek is ERC721Enumerable, Ownable
         Nose        7
         Headware    8
         Accessory   9
-
         Phunked     10
-
-        Id          11
-        Series      12
     */
 
-    //10 - 000000000000000000000000000000
-    //11 - 000000000000000000000000000000000
-    //12 - 000000000000000000000000000000000000
-    //13 - 000000000000000000000000000000000000000
+    //1077001002003004005006007008009010
+    //1777777777777777777777777777777777
+    //1001001000001000001000001001001000
+
+    //1011022033044055066077088099111777
 
     //Mint
     //Lock supply
 
-    function _prefixZeros(uint256 value) private pure returns (string memory result)
+    function totalSupply() public view returns (uint256)
     {
-        result = WojekHelper.toString(value);
-
-        if(value > 9)
-        {
-            result = string(abi.encodePacked("0", result));
-        }
-        else
-        {
-            result = string(abi.encodePacked("00", result));
-        }
-
-        return result;
+        return _totalSupply;
     }
 
-    function testRandomHash(uint256 id) public view returns (string memory hash)
+    function _splitHash(uint256 hash, uint256 attributeIndex) public pure returns (uint256)
     {
-        uint256 randomNumber = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, id, _currentSeries)));
+        uint256 a = hash - 10 ** _hashLength;
 
-        for(uint256 i = 0; i < _traitCount; i++)
-        {
-            uint256 trait = randomNumber % 10;
-
-            hash = string(abi.encodePacked(hash, _prefixZeros(trait)));
-
-            randomNumber >>= 12;
-        }
-
-        return string(abi.encodePacked(hash, _prefixZeros(id), _prefixZeros(_currentSeries)));
+        return (a / (10 ** (_hashLength - (attributeIndex * 3)))) % 1000;
     }
 
-    function hashBatch() public returns (bool)
+    function _dirtyRandom(uint256 seed) private view returns (uint256)
     {
-        for(uint256 i = 0; i < 25; i++)
-        {
-            _tokenHashes[idToIndex(i)] = testRandomHash(i);
-            _tokenIndexes[i] = idToIndex(i);
-        }
-
-        return true;
+        return uint256(keccak256(abi.encodePacked(type(uint256).max, block.difficulty, block.timestamp, seed)));
     }
 
-    /*
-    function generateHash() private returns (string memory)
+    function generateTokens(uint256 amount) public returns (bool)
     {
-        uint256 id = totalSupply();
+        uint256 randomNumber;
 
-        uint256 randomNumber = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, id, _currentSeries)));
-
-
-
-        string memory traits;
-        
-        for(uint256 i = 0; i < _traitCount; i++)
+        for(uint256 a = 0; a < amount; a++)
         {
+            uint256 supply = _totalSupply;
 
-        }
+            randomNumber = _dirtyRandom(supply * gasleft());
 
-        string memory phunk;
+            //Prefix
+            uint256 hash = 10 ** _hashLength;
 
-        return string(abi.encodePacked(traits, phunk));
-    }
-    */
+            //Traits
+            for(uint256 i = 0; i < _traitCount; i++)
+            {
+                uint256 prefix = 10 ** (_hashLength - (i * 3) - 3);
 
-    function mint() public returns (bool)
-    {
-        uint256 supply = totalSupply();
+                uint16 trait = uint16(randomNumber % _attributes[i].length);
 
-        string memory hash = "000000000000000000000000000000000000001";
+                hash += prefix * trait;
 
-        uint256 id = hashToId(hash);
+                randomNumber >>= 8;
+            }
 
-        uint256 index = hashToIndex(hash);
+            //Phunk - Phuck punks
+            if(randomNumber % 100 < 5)
+            {
+                hash += 1; 
+            }
 
-        _tokenHashes[index] = hash;
-        _tokenIndexes[id] = index;
+            if(_mintedTokens[hash] == false)
+            {
+                _mintedTokens[hash] = true;
+                _tokenHashes[supply] = hash;
 
-        _safeMint(_msgSender(), supply);
-
-        return true;
-    }
-
-    function hashExists(string memory hash) private view returns (bool)
-    {
-        if(WojekHelper.stringLength(_tokenHashes[hashToId(hash)]) != _hashLength)
-        {
-            return false;
+                _safeMint(_msgSender(), supply);
+                _totalSupply += 1;
+            }
         }
 
         return true;
-    }
-
-    function idToIndex(uint256 id) private view returns (uint256)
-    {
-        return _tokenIndexes[id];
-    }
-
-    function hashToId(string memory hash) private pure  returns (uint256)
-    {
-        return WojekHelper.parseInt(WojekHelper.substring(hash, 11 * 3, 11 * 3 + 3));
-    }
-
-    function hashToIndex(string memory hash) private pure returns (uint256)
-    {
-        //Drop id and series to avoid duplicated attributes
-        return WojekHelper.parseInt(WojekHelper.substring(hash, 0, _hashLength - 6));
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) //BROKEN
     {
         require(_exists(id));
 
-        uint256 hashIndex = idToIndex(id);
+        uint256 hash = _tokenHashes[id];
 
-        string memory hash = _tokenHashes[hashIndex];
+        require(_mintedTokens[hash] == true);
 
         string memory uri = string(abi.encodePacked
         (
@@ -1554,9 +1354,9 @@ contract Wojek is ERC721Enumerable, Ownable
                     '","description": "',
                     "Wojek's display a wide variety of emotions, even the feelsbad ones.", 
                     '","image": "data:image/svg+xml;base64,',
-                    WojekHelper.encode(bytes(generateSvg(hash))),
+                    WojekHelper.encode(bytes(_generateSvg(hash))),
                     '","attributes":',
-                    hashMetadata(hash),
+                    _hashMetadata(hash),
                     "}"
                 )))
             )
@@ -1565,13 +1365,13 @@ contract Wojek is ERC721Enumerable, Ownable
         return uri;
     }
 
-    function hashMetadata(string memory hash) private view returns(string memory)
+    function _hashMetadata(uint256 hash) private view returns(string memory)
     {
         string memory metadata;
 
         for(uint256 i = 0; i < _traitCount; i++) 
         {
-            uint256 attributeIndex = WojekHelper.parseInt(WojekHelper.substring(hash, i * 3, i * 3 + 3));
+            uint256 attributeIndex = _splitHash(hash, i);
 
             metadata = string(abi.encodePacked
             (
@@ -1584,16 +1384,38 @@ contract Wojek is ERC721Enumerable, Ownable
             ));
         }
 
+        if(_splitHash(hash, 10) > 0)
+        {
+            //Phunked
+            metadata = string(abi.encodePacked
+            (
+                metadata,
+                '{"trait_type":"',
+                "Phunk",
+                '","value":"',
+                "Phunked",
+                '"}'
+            ));
+        }
+
         return string(abi.encodePacked("[", metadata, "]"));
     }
 
-    function generateSvg(string memory hash) private view returns(string memory) 
+    function _generateSvg(uint256 hash) private view returns(string memory) 
     {
-        string memory svg = string(abi.encodePacked(_svgHeader, _svgStyles));
+        string memory xScale = "1";
+
+        if(_splitHash(hash, 10) > 0)
+        {
+            //Phunked
+            xScale = "-1";
+        }
+
+        string memory svg = string(abi.encodePacked(_svgHeader, xScale, ",1)'>", _svgStyles));
 
         for(uint256 i = 0; i < _traitCount; i++) 
         {
-            uint256 attributeIndex = WojekHelper.parseInt(WojekHelper.substring(hash, i * 3, i * 3 + 3));
+            uint256 attributeIndex = _splitHash(hash, i);
 
             svg = string(abi.encodePacked(svg, _attributes[i][attributeIndex].svg));
         }
@@ -1659,46 +1481,3 @@ contract Wojek is ERC721Enumerable, Ownable
         return true;
     }
 }
-
-/*  Old SVG generators 
-
-    string memory data = _attributes[i][attributeIndex].svg;
-
-    //uint256 attributeLength = WojekHelper.stringLength(data) / 35;
-
-    for(uint256 r = 0; r < 150; r++)
-    {
-        uint256 dataIndex = r * 35;
-
-        if(dataIndex >= WojekHelper.stringLength(data))
-        {
-            break;
-        }
-        else
-        {
-            svg = string(abi.encodePacked
-            (
-                svg,
-                "<rect class='w",
-                WojekHelper.substring(data, dataIndex, dataIndex + 35),
-                "'/>"
-            ));
-        }
-
-        svg = string(abi.encodePacked
-        (
-            svg,
-            "<rect class='w",
-            WojekHelper.substring(data, dataIndex + 9, dataIndex + 11),
-            "' x='", 
-            WojekHelper.substring(data, dataIndex, dataIndex + 2), 
-            "' y='", 
-            WojekHelper.substring(data, dataIndex + 2, dataIndex + 4), 
-            "' width='",
-            WojekHelper.substring(data, dataIndex + 4, dataIndex + 6),
-            "' height='",
-            WojekHelper.substring(data, dataIndex + 6, dataIndex + 8),
-            "'/>"
-        ));
-    }
-*/
