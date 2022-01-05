@@ -1300,7 +1300,10 @@ contract Wojek is ERC721Enumerable, Ownable
     ));
 
     Attribute[][] private _attributes;
-    mapping(uint256 => string) private _tokens;
+    mapping(uint256 => string) private _tokenHashes;    //Index => Hash
+    mapping(uint256 => uint256) private _tokenIndexes;  //Id => Index
+
+    uint256 private _currentSeries;
 
     constructor() ERC721("Wojek", "WOJEK")
     {
@@ -1310,22 +1313,22 @@ contract Wojek is ERC721Enumerable, Ownable
             _attributes.push();
 
             //Debug attributes
-            _attributes[i].push(Attribute("", "White", "<rect class='w01'x='00'y='00'width='50'height='50'/>"));
+            _attributes[i].push(Attribute("", "White", "<rect class='w01' x='00' y='00' width='50' height='50'/>"));
         }
 
         /*
 
         Backgrounds
         [ 
-            ["", "White", "<rect class='w01'x='00'y='00'width='50'height='50'/>"],
-            ["", "Cyan", "<rect class='w12'x='00'y='00'width='50'height='50'/>"],
-            ["", "Pink", "<rect class='w05'x='00'y='00'width='50'height='50'/>"],
-            ["", "Green", "<rect class='w13'x='00'y='00'width='50'height='50'/>"]
+            ["", "White", "<rect class='w01' x='00' y='00' width='50' height='50'/>"],
+            ["", "Cyan", "<rect class='w12' x='00' y='00' width='50' height='50'/>"],
+            ["", "Pink", "<rect class='w05' x='00'y='00' width='50'height='50'/>"],
+            ["", "Green", "<rect class='w13' x='00' y='00' width='50' height='50'/>"]
         ]
 
         Characters
         [
-            ["", "Wojak", "<rect class='w01'x='15'y='05'width='19'height='45'/><rect class='w01'x='17'y='03'width='18'height='02'/><rect class='w01'x='34'y='05'width='04'height='37'/><rect class='w01'x='38'y='07'width='02'height='33'/><rect class='w01'x='40'y='09'width='02'height='29'/><rect class='w01'x='42'y='14'width='02'height='20'/><rect class='w01'x='44'y='25'width='01'height='05'/><rect class='w01'x='13'y='07'width='02'height='24'/><rect class='w01'x='11'y='11'width='02'height='15'/><rect class='w01'x='34'y='46'width='12'height='04'/><rect class='w01'x='46'y='49'width='03'height='01'/><rect class='w01'x='34'y='45'width='01'height='01'/><rect class='w01'x='46'y='48'width='01'height='01'/><rect class='w01'x='00'y='47'width='15'height='03'/><rect class='w01'x='05'y='45'width='10'height='02'/><rect class='w01'x='11'y='43'width='04'height='02'/><rect class='w01'x='13'y='39'width='02'height='04'/><rect class='w00'x='00'y='47'width='01'height='01'/><rect class='w00'x='01'y='46'width='04'height='01'/><rect class='w00'x='05'y='45'width='03'height='01'/><rect class='w00'x='08'y='44'width='03'height='01'/><rect class='w00'x='11'y='43'width='01'height='01'/><rect class='w00'x='12'y='42'width='01'height='01'/><rect class='w00'x='13'y='39'width='01'height='03'/><rect class='w00'x='14'y='37'width='01'height='02'/><rect class='w00'x='15'y='32'width='01'height='05'/><rect class='w00'x='14'y='31'width='01'height='01'/><rect class='w00'x='13'y='29'width='01'height='02'/><rect class='w00'x='12'y='26'width='01'height='03'/><rect class='w00'x='11'y='24'width='01'height='02'/><rect class='w00'x='10'y='14'width='01'height='10'/><rect class='w00'x='11'y='11'width='01'height='03'/><rect class='w00'x='12'y='08'width='01'height='03'/><rect class='w00'x='13'y='07'width='01'height='01'/><rect class='w00'x='14'y='06'width='01'height='01'/><rect class='w00'x='15'y='05'width='01'height='01'/><rect class='w00'x='16'y='04'width='01'height='01'/><rect class='w00'x='17'y='03'width='03'height='01'/><rect class='w00'x='20'y='02'width='11'height='01'/><rect class='w00'x='31'y='03'width='04'height='01'/><rect class='w00'x='35'y='04'width='02'height='01'/><rect class='w00'x='37'y='05'width='01'height='01'/><rect class='w00'x='38'y='06'width='01'height='01'/><rect class='w00'x='39'y='07'width='01'height='01'/><rect class='w00'x='40'y='08'width='01'height='01'/><rect class='w00'x='41'y='09'width='01'height='02'/><rect class='w00'x='42'y='11'width='01'height='03'/><rect class='w00'x='43'y='14'width='01'height='03'/><rect class='w00'x='44'y='17'width='01'height='08'/><rect class='w00'x='45'y='25'width='01'height='05'/><rect class='w00'x='44'y='30'width='01'height='02'/><rect class='w00'x='43'y='32'width='01'height='02'/><rect class='w00'x='42'y='34'width='01'height='01'/><rect class='w00'x='41'y='35'width='01'height='03'/><rect class='w00'x='40'y='38'width='01'height='01'/><rect class='w00'x='39'y='39'width='01'height='01'/><rect class='w00'x='38'y='40'width='01'height='01'/><rect class='w00'x='36'y='41'width='02'height='01'/><rect class='w00'x='30'y='42'width='06'height='01'/><rect class='w00'x='28'y='41'width='02'height='01'/><rect class='w00'x='27'y='40'width='01'height='01'/><rect class='w00'x='25'y='39'width='02'height='01'/><rect class='w00'x='24'y='38'width='01'height='01'/><rect class='w00'x='23'y='37'width='01'height='01'/><rect class='w00'x='22'y='36'width='01'height='01'/><rect class='w00'x='21'y='35'width='01'height='01'/><rect class='w00'x='20'y='34'width='01'height='01'/><rect class='w00'x='19'y='31'width='01'height='03'/><rect class='w00'x='18'y='28'width='01'height='03'/><rect class='w00'x='33'y='43'width='01'height='01'/><rect class='w00'x='34'y='44'width='01'height='01'/><rect class='w00'x='35'y='45'width='08'height='01'/><rect class='w00'x='43'y='46'width='03'height='01'/><rect class='w00'x='46'y='47'width='01'height='01'/><rect class='w00'x='47'y='48'width='02'height='01'/><rect class='w00'x='49'y='49'width='01'height='01'/><rect class='w00'x='18'y='36'width='01'height='01'/><rect class='w00'x='19'y='37'width='01'height='02'/><rect class='w00'x='14'y='45'width='02'height='01'/><rect class='w00'x='16'y='44'width='01'height='01'/><rect class='w00'x='17'y='43'width='02'height='01'/><rect class='w00'x='23'y='47'width='02'height='01'/><rect class='w00'x='25'y='48'width='04'height='01'/><rect class='w00'x='29'y='47'width='02'height='01'/>"]
+            ["", "Wojak", "<rect class='w01' x='15' y='05' width='19' height='45'/><rect class='w01' x='17' y='03' width='18' height='02'/><rect class='w01' x='34' y='05' width='04' height='37'/><rect class='w01' x='38' y='07' width='02' height='33'/><rect class='w01' x='40' y='09' width='02' height='29'/><rect class='w01' x='42' y='14' width='02' height='20'/><rect class='w01' x='44' y='25' width='01' height='05'/><rect class='w01' x='13' y='07' width='02' height='24'/><rect class='w01' x='11' y='11' width='02' height='15'/><rect class='w01' x='34' y='46' width='12' height='04'/><rect class='w01' x='46' y='49' width='03' height='01'/><rect class='w01' x='34' y='45' width='01' height='01'/><rect class='w01' x='46' y='48' width='01' height='01'/><rect class='w01' x='00' y='47' width='15' height='03'/><rect class='w01' x='05' y='45' width='10' height='02'/><rect class='w01' x='11' y='43' width='04' height='02'/><rect class='w01' x='13' y='39' width='02' height='04'/><rect class='w00' x='00' y='47' width='01' height='01'/><rect class='w00' x='01' y='46' width='04' height='01'/><rect class='w00' x='05' y='45' width='03' height='01'/><rect class='w00' x='08' y='44' width='03' height='01'/><rect class='w00' x='11' y='43' width='01' height='01'/><rect class='w00' x='12' y='42' width='01' height='01'/><rect class='w00' x='13' y='39' width='01' height='03'/><rect class='w00' x='14' y='37' width='01' height='02'/><rect class='w00' x='15' y='32' width='01' height='05'/><rect class='w00' x='14' y='31' width='01' height='01'/><rect class='w00' x='13' y='29' width='01' height='02'/><rect class='w00' x='12' y='26' width='01' height='03'/><rect class='w00' x='11' y='24' width='01' height='02'/><rect class='w00' x='10' y='14' width='01' height='10'/><rect class='w00' x='11' y='11' width='01' height='03'/><rect class='w00' x='12' y='08' width='01' height='03'/><rect class='w00' x='13' y='07' width='01' height='01'/><rect class='w00' x='14' y='06' width='01' height='01'/><rect class='w00' x='15' y='05' width='01' height='01'/><rect class='w00' x='16' y='04' width='01' height='01'/><rect class='w00' x='17' y='03' width='03' height='01'/><rect class='w00' x='20' y='02' width='11' height='01'/><rect class='w00' x='31' y='03' width='04' height='01'/><rect class='w00' x='35' y='04' width='02' height='01'/><rect class='w00' x='37' y='05' width='01' height='01'/><rect class='w00' x='38' y='06' width='01' height='01'/><rect class='w00' x='39' y='07' width='01' height='01'/><rect class='w00' x='40' y='08' width='01' height='01'/><rect class='w00' x='41' y='09' width='01' height='02'/><rect class='w00' x='42' y='11' width='01' height='03'/><rect class='w00' x='43' y='14' width='01' height='03'/><rect class='w00' x='44' y='17' width='01' height='08'/><rect class='w00' x='45' y='25' width='01' height='05'/><rect class='w00' x='44' y='30' width='01' height='02'/><rect class='w00' x='43' y='32' width='01' height='02'/><rect class='w00' x='42' y='34' width='01' height='01'/><rect class='w00' x='41' y='35' width='01' height='03'/><rect class='w00' x='40' y='38' width='01' height='01'/><rect class='w00' x='39' y='39' width='01' height='01'/><rect class='w00' x='38' y='40' width='01' height='01'/><rect class='w00' x='36' y='41' width='02' height='01'/><rect class='w00' x='30' y='42' width='06' height='01'/><rect class='w00' x='28' y='41' width='02' height='01'/><rect class='w00' x='27' y='40' width='01' height='01'/><rect class='w00' x='25' y='39' width='02' height='01'/><rect class='w00' x='24' y='38' width='01' height='01'/><rect class='w00' x='23' y='37' width='01' height='01'/><rect class='w00' x='22' y='36' width='01' height='01'/><rect class='w00' x='21' y='35' width='01' height='01'/><rect class='w00' x='20' y='34' width='01' height='01'/><rect class='w00' x='19' y='31' width='01' height='03'/><rect class='w00' x='18' y='28' width='01' height='03'/><rect class='w00' x='33' y='43' width='01' height='01'/><rect class='w00' x='34' y='44' width='01' height='01'/><rect class='w00' x='35' y='45' width='08' height='01'/><rect class='w00' x='43' y='46' width='03' height='01'/><rect class='w00' x='46' y='47' width='01' height='01'/><rect class='w00' x='47' y='48' width='02' height='01'/><rect class='w00' x='49' y='49' width='01' height='01'/><rect class='w00' x='18' y='36' width='01' height='01'/><rect class='w00' x='19' y='37' width='01' height='02'/><rect class='w00' x='14' y='45' width='02' height='01'/><rect class='w00' x='16' y='44' width='01' height='01'/><rect class='w00' x='17' y='43' width='02' height='01'/><rect class='w00' x='23' y='47' width='02' height='01'/><rect class='w00' x='25' y='48' width='04' height='01'/><rect class='w00' x='29' y='47' width='02' height='01'/>"]
         ]
 
         Skins TODO: Cursed
@@ -1340,56 +1343,56 @@ contract Wojek is ERC721Enumerable, Ownable
 
         Foreheads
         [
-            ["", "Wojak", "<rect class='w00'x='23'y='11'width='04'height='01'/><rect class='w00'x='27'y='10'width='09'height='01'/><rect class='w00'x='36'y='11'width='03'height='01'/><rect class='w00'x='21'y='15'width='02'height='01'/><rect class='w00'x='23'y='14'width='06'height='01'/><rect class='w00'x='29'y='13'width='07'height='01'/><rect class='w00'x='36'y='14'width='02'height='01'/><rect class='w00'x='23'y='19'width='02'height='01'/><rect class='w00'x='25'y='18'width='04'height='01'/><rect class='w00'x='36'y='18'width='04'height='01'/><rect class='w00'x='40'y='19'width='02'height='01'/>"],
+            ["", "Wojak", "<rect class='w00' x='23' y='11' width='04' height='01'/><rect class='w00' x='27' y='10' width='09' height='01'/><rect class='w00' x='36' y='11' width='03' height='01'/><rect class='w00' x='21' y='15' width='02' height='01'/><rect class='w00' x='23' y='14' width='06' height='01'/><rect class='w00' x='29' y='13' width='07' height='01'/><rect class='w00' x='36' y='14' width='02' height='01'/><rect class='w00' x='23' y='19' width='02' height='01'/><rect class='w00' x='25' y='18' width='04' height='01'/><rect class='w00' x='36' y='18' width='04' height='01'/><rect class='w00' x='40' y='19' width='02' height='01'/>"],
             ["", "NPC", ""],
-            ["", "Smug", "<rect class='w00'x='21'y='10'width='02'height='01'/><rect class='w00'x='23'y='09'width='03'height='01'/><rect class='w00'x='26'y='08'width='10'height='01'/><rect class='w00'x='36'y='09'width='02'height='01'/><rect class='w00'x='38'y='10'width='01'height='01'/><rect class='w00'x='26'y='11'width='02'height='01'/><rect class='w00'x='28'y='10'width='04'height='01'/><rect class='w00'x='32'y='11'width='04'height='01'/><rect class='w00'x='23'y='18'width='03'height='01'/><rect class='w00'x='26'y='17'width='02'height='01'/><rect class='w00'x='28'y='16'width='02'height='01'/><rect class='w00'x='30'y='15'width='01'height='01'/><rect class='w00'x='35'y='17'width='01'height='01'/><rect class='w00'x='36'y='18'width='06'height='01'/><rect class='w00'x='42'y='19'width='01'height='01'/>"],
-            ["", "Bloomer", "<rect class='w00'x='28'y='34'width='09'height='04'/><rect class='w00'x='26'y='33'width='07'height='01'/><rect class='w00'x='27'y='32'width='01'height='04'/><rect class='w00'x='37'y='35'width='01'height='02'/><rect class='w00'x='29'y='38'width='07'height='01'/><rect class='w00'x='31'y='39'width='04'height='01'/><rect class='w01'x='31'y='34'width='02'height='01'/><rect class='w01'x='33'y='35'width='02'height='01'/><rect class='w01'x='31'y='38'width='03'height='01'/><rect class='w01'x='30'y='37'width='01'height='01'/>"],
-            ["", "Soyjak", "<rect class='w00'x='29'y='33'width='08'height='06'/><rect class='w00'x='28'y='34'width='01'height='03'/><rect class='w00'x='37'y='34'width='01'height='03'/><rect class='w00'x='30'y='39'width='06'height='01'/><rect class='w00'x='27'y='32'width='01'height='01'/><rect class='w00'x='26'y='33'width='01'height='03'/><rect class='w00'x='38'y='32'width='01'height='01'/><rect class='w00'x='39'y='33'width='01'height='02'/><rect class='w01'x='30'y='34'width='01'height='01'/><rect class='w01'x='32'y='34'width='01'height='01'/><rect class='w01'x='34'y='34'width='01'height='01'/>"]
+            ["", "Smug", "<rect class='w00' x='21' y='10' width='02' height='01'/><rect class='w00' x='23' y='09' width='03' height='01'/><rect class='w00' x='26' y='08' width='10' height='01'/><rect class='w00' x='36' y='09' width='02' height='01'/><rect class='w00' x='38' y='10' width='01' height='01'/><rect class='w00' x='26' y='11' width='02' height='01'/><rect class='w00' x='28' y='10' width='04' height='01'/><rect class='w00' x='32' y='11' width='04' height='01'/><rect class='w00' x='23' y='18' width='03' height='01'/><rect class='w00' x='26' y='17' width='02' height='01'/><rect class='w00' x='28' y='16' width='02' height='01'/><rect class='w00' x='30' y='15' width='01' height='01'/><rect class='w00' x='35' y='17' width='01' height='01'/><rect class='w00' x='36' y='18' width='06' height='01'/><rect class='w00' x='42' y='19' width='01' height='01'/>"],
+            ["", "Bloomer", "<rect class='w00' x='28' y='34' width='09' height='04'/><rect class='w00' x='26' y='33' width='07' height='01'/><rect class='w00' x='27' y='32' width='01' height='04'/><rect class='w00' x='37' y='35' width='01' height='02'/><rect class='w00' x='29' y='38' width='07' height='01'/><rect class='w00' x='31' y='39' width='04' height='01'/><rect class='w01' x='31' y='34' width='02' height='01'/><rect class='w01' x='33' y='35' width='02' height='01'/><rect class='w01' x='31' y='38' width='03' height='01'/><rect class='w01' x='30' y='37' width='01' height='01'/>"],
+            ["", "Soyjak", "<rect class='w00' x='29' y='33' width='08' height='06'/><rect class='w00' x='28' y='34' width='01' height='03'/><rect class='w00' x='37' y='34' width='01' height='03'/><rect class='w00' x='30' y='39' width='06' height='01'/><rect class='w00' x='27' y='32' width='01' height='01'/><rect class='w00' x='26' y='33' width='01' height='03'/><rect class='w00' x='38' y='32' width='01' height='01'/><rect class='w00' x='39' y='33' width='01' height='02'/><rect class='w01' x='30' y='34' width='01' height='01'/><rect class='w01' x='32' y='34' width='01' height='01'/><rect class='w01' x='34' y='34' width='01' height='01'/>"]
         ]
 
         Mouths
         [
-            ["", "Wojak", "<rect class='w00'x='28'y='35'width='05'height='01'/><rect class='w00'x='33'y='36'width='05'height='01'/>"],
+            ["", "Wojak", "<rect class='w00' x='28' y='35' width='05' height='01'/><rect class='w00' x='33' y='36' width='05' height='01'/>"],
             ["", "NPC", ""],
-            ["", "Dumb wojak", "<rect class='w00'x='28'y='34'width='11'height='01'/><rect class='w00'x='29'y='35'width='09'height='01'/><rect class='w02'x='28'y='35'width='01'height='04'/><rect class='w02'x='30'y='36'width='01'height='02'/>"],
-            ["", "Pink wojak", "<rect class='w00'x='29'y='33'width='08'height='06'/><rect class='w00'x='28'y='34'width='01'height='04'/><rect class='w00'x='37'y='34'width='01'height='04'/><rect class='w01'x='29'y='34'width='01'height='01'/><rect class='w01'x='31'y='34'width='02'height='01'/><rect class='w01'x='34'y='34'width='02'height='01'/><rect class='w01'x='29'y='37'width='01'height='01'/><rect class='w01'x='31'y='37'width='02'height='01'/><rect class='w01'x='34'y='37'width='02'height='01'/>"],
-            ["", "Smug", ""<rect class='w00'x='27'y='33'width='01'height='01'/><rect class='w00'x='26'y='34'width='02'height='01'/><rect class='w00'x='28'y='35'width='04'height='01'/><rect class='w00'x='32'y='36'width='06'height='01'/>],
-            ["", "Bloomer", "<rect class='w00'x='28'y='34'width='09'height='04'/><rect class='w00'x='26'y='33'width='07'height='01'/><rect class='w00'x='27'y='32'width='01'height='04'/><rect class='w00'x='37'y='35'width='01'height='02'/><rect class='w00'x='29'y='38'width='07'height='01'/><rect class='w00'x='31'y='39'width='04'height='01'/><rect class='w01'x='31'y='34'width='02'height='01'/><rect class='w01'x='33'y='35'width='02'height='01'/><rect class='w01'x='31'y='38'width='03'height='01'/><rect class='w01'x='30'y='37'width='01'height='01'/>"],
-            ["", "Soyjak", "<rect class='w00'x='29'y='33'width='08'height='06'/><rect class='w00'x='28'y='34'width='01'height='03'/><rect class='w00'x='37'y='34'width='01'height='03'/><rect class='w00'x='30'y='39'width='06'height='01'/><rect class='w00'x='27'y='32'width='01'height='01'/><rect class='w00'x='26'y='33'width='01'height='03'/><rect class='w00'x='38'y='32'width='01'height='01'/><rect class='w00'x='39'y='33'width='01'height='02'/><rect class='w01'x='30'y='34'width='01'height='01'/><rect class='w01'x='32'y='34'width='01'height='01'/><rect class='w01'x='34'y='34'width='01'height='01'/>"]
+            ["", "Dumb wojak", "<rect class='w00' x='28' y='34' width='11' height='01'/><rect class='w00' x='29' y='35' width='09' height='01'/><rect class='w02' x='28' y='35' width='01' height='04'/><rect class='w02' x='30' y='36' width='01' height='02'/>"],
+            ["", "Pink wojak", "<rect class='w00' x='29' y='33' width='08' height='06'/><rect class='w00' x='28' y='34' width='01' height='04'/><rect class='w00' x='37' y='34' width='01' height='04'/><rect class='w01' x='29' y='34' width='01' height='01'/><rect class='w01' x='31' y='34' width='02' height='01'/><rect class='w01' x='34' y='34' width='02' height='01'/><rect class='w01' x='29' y='37' width='01' height='01'/><rect class='w01' x='31' y='37' width='02' height='01'/><rect class='w01' x='34' y='37' width='02' height='01'/>"],
+            ["", "Smug", ""<rect class='w00' x='27' y='33' width='01' height='01'/><rect class='w00' x='26' y='34' width='02' height='01'/><rect class='w00' x='28' y='35' width='04' height='01'/><rect class='w00' x='32' y='36' width='06' height='01'/>],
+            ["", "Bloomer", "<rect class='w00' x='28' y='34' width='09' height='04'/><rect class='w00' x='26' y='33' width='07' height='01'/><rect class='w00' x='27' y='32' width='01' height='04'/><rect class='w00' x='37' y='35' width='01' height='02'/><rect class='w00' x='29' y='38' width='07' height='01'/><rect class='w00' x='31' y='39' width='04' height='01'/><rect class='w01' x='31' y='34' width='02' height='01'/><rect class='w01' x='33' y='35' width='02' height='01'/><rect class='w01' x='31' y='38' width='03' height='01'/><rect class='w01' x='30' y='37' width='01' height='01'/>"],
+            ["", "Soyjak", "<rect class='w00' x='29' y='33' width='08' height='06'/><rect class='w00' x='28' y='34' width='01' height='03'/><rect class='w00' x='37' y='34' width='01' height='03'/><rect class='w00' x='30' y='39' width='06' height='01'/><rect class='w00' x='27' y='32' width='01' height='01'/><rect class='w00' x='26' y='33' width='01' height='03'/><rect class='w00' x='38' y='32' width='01' height='01'/><rect class='w00' x='39' y='33' width='01' height='02'/><rect class='w01' x='30' y='34' width='01' height='01'/><rect class='w01' x='32' y='34' width='01' height='01'/><rect class='w01' x='34' y='34' width='01' height='01'/>"]
         ]
 
         Eyes
         [
-            ["", "Wojak", "<rect class='w00'x='24'y='21'width='05'height='02'/><rect class='w00'x='29'y='22'width='01'height='02'/><rect class='w00'x='25'y='23'width='04'height='01'/><rect class='w01'x='25'y='22'width='01'height='01'/><rect class='w00'x='36'y='21'width='05'height='02'/><rect class='w00'x='37'y='23'width='03'height='01'/><rect class='w01'x='37'y='22'width='01'height='01'/>"],
-            ["", "NPC", "<rect class='w00'x='26'y='21'width='03'height='03'/><rect class='w00'x='37'y='21'width='03'height='03'/>"],
-            ["", "Smug", "<rect class='w00'x='24'y='21'width='05'height='02'/><rect class='w00'x='29'y='22'width='01'height='02'/><rect class='w00'x='25'y='23'width='04'height='01'/><rect class='w01'x='28'y='22'width='01'height='01'/><rect class='w00'x='36'y='21'width='05'height='02'/><rect class='w00'x='37'y='23'width='03'height='01'/><rect class='w01'x='39'y='22'width='01'height='01'/>"],
-            ["", "Closed", "<rect class='w00'x='24'y='22'width='01'height='01'/><rect class='w00'x='25'y='23'width='04'height='01'/><rect class='w00'x='29'y='22'width='01'height='01'/><rect class='w00'x='36'y='22'width='01'height='01'/><rect class='w00'x='37'y='23'width='03'height='01'/><rect class='w00'x='40'y='22'width='01'height='01'/>"],
-            ["", "Crying", "<rect class='w00'x='24'y='21'width='05'height='02'/><rect class='w00'x='29'y='22'width='01'height='02'/><rect class='w00'x='25'y='23'width='04'height='01'/><rect class='w04'x='25'y='22'width='01'height='01'/><rect class='w00'x='36'y='21'width='05'height='02'/><rect class='w00'x='37'y='23'width='03'height='01'/><rect class='w04'x='37'y='22'width='01'height='01'/><rect class='w02'x='24'y='23'width='01'height='08'/><rect class='w02'x='24'y='35'width='01'height='03'/><rect class='w02'x='25'y='40'width='01'height='01'/><rect class='w02'x='26'y='24'width='01'height='03'/><rect class='w02'x='29'y='24'width='01'height='02'/><rect class='w02'x='28'y='26'width='01'height='01'/><rect class='w02'x='27'y='27'width='01'height='02'/><rect class='w02'x='26'y='29'width='01'height='02'/><rect class='w02'x='25'y='31'width='01'height='04'/><rect class='w02'x='26'y='35'width='01'height='02'/><rect class='w02'x='27'y='37'width='01'height='02'/><rect class='w02'x='28'y='39'width='01'height='02'/><rect class='w02'x='29'y='42'width='01'height='02'/><rect class='w02'x='38'y='24'width='01'height='07'/><rect class='w02'x='39'y='31'width='01'height='04'/><rect class='w02'x='38'y='35'width='01'height='05'/><rect class='w02'x='40'y='23'width='01'height='01'/><rect class='w02'x='41'y='24'width='01'height='07'/><rect class='w02'x='42'y='31'width='01'height='03'/>"],
-            ["", "Pink wojak", "<rect class='w04'x='23'y='21'width='06'height='04'/><rect class='w00'x='23'y='21'width='01'height='01'/><rect class='w00'x='24'y='20'width='04'height='01'/><rect class='w00'x='28'y='21'width='01'height='01'/><rect class='w00'x='22'y='22'width='01'height='02'/><rect class='w00'x='29'y='22'width='01'height='02'/><rect class='w00'x='23'y='24'width='01'height='01'/><rect class='w00'x='28'y='24'width='01'height='01'/><rect class='w00'x='24'y='25'width='04'height='01'/><rect class='w00'x='25'y='22'width='02'height='02'/><rect class='w04'x='36'y='21'width='06'height='04'/><rect class='w00'x='36'y='21'width='01'height='01'/><rect class='w00'x='37'y='20'width='04'height='01'/><rect class='w00'x='41'y='21'width='01'height='01'/><rect class='w00'x='35'y='22'width='01'height='02'/><rect class='w00'x='42'y='22'width='01'height='02'/><rect class='w00'x='36'y='24'width='01'height='01'/><rect class='w00'x='41'y='24'width='01'height='01'/><rect class='w00'x='37'y='25'width='04'height='01'/><rect class='w00'x='38'y='22'width='02'height='02'/><rect class='w03'x='24'y='26'width='01'height='05'/><rect class='w03'x='24'y='35'width='01'height='03'/><rect class='w03'x='25'y='40'width='01'height='01'/><rect class='w03'x='26'y='26'width='01'height='01'/><rect class='w03'x='29'y='24'width='01'height='02'/><rect class='w03'x='28'y='26'width='01'height='01'/><rect class='w03'x='27'y='27'width='01'height='02'/><rect class='w03'x='26'y='29'width='01'height='02'/><rect class='w03'x='25'y='31'width='01'height='04'/><rect class='w03'x='26'y='35'width='01'height='02'/><rect class='w03'x='27'y='37'width='01'height='02'/><rect class='w03'x='28'y='39'width='01'height='02'/><rect class='w03'x='29'y='42'width='01'height='02'/><rect class='w03'x='38'y='26'width='01'height='05'/><rect class='w03'x='39'y='31'width='01'height='04'/><rect class='w03'x='38'y='35'width='01'height='05'/><rect class='w03'x='41'y='25'width='01'height='06'/><rect class='w03'x='42'y='31'width='01'height='03'/>"],
-            ["", "Cursed", "<rect class='w00'x='24'y='21'width='01'height='02'/><rect class='w00'x='25'y='20'width='04'height='04'/><rect class='w00'x='29'y='21'width='01'height='03'/><rect class='w00'x='26'y='24'width='03'height='01'/><rect class='w00'x='25'y='27'width='03'height='01'/><rect class='w00'x='28'y='26'width='02'height='01'/><rect class='w00'x='30'y='25'width='01'height='01'/><rect class='w00'x='36'y='21'width='01'height='02'/><rect class='w00'x='37'y='20'width='04'height='04'/><rect class='w00'x='41'y='21'width='01'height='03'/><rect class='w00'x='38'y='24'width='03'height='01'/><rect class='w00'x='36'y='25'width='01'height='01'/><rect class='w00'x='37'y='26'width='02'height='01'/><rect class='w00'x='39'y='27'width='02'height='01'/>"]
+            ["", "Wojak", "<rect class='w00' x='24' y='21' width='05' height='02'/><rect class='w00' x='29' y='22' width='01' height='02'/><rect class='w00' x='25' y='23' width='04' height='01'/><rect class='w01' x='25' y='22' width='01' height='01'/><rect class='w00' x='36' y='21' width='05' height='02'/><rect class='w00' x='37' y='23' width='03' height='01'/><rect class='w01' x='37' y='22' width='01' height='01'/>"],
+            ["", "NPC", "<rect class='w00' x='26' y='21' width='03' height='03'/><rect class='w00' x='37' y='21' width='03' height='03'/>"],
+            ["", "Smug", "<rect class='w00' x='24' y='21' width='05' height='02'/><rect class='w00' x='29' y='22' width='01' height='02'/><rect class='w00' x='25' y='23' width='04' height='01'/><rect class='w01' x='28' y='22' width='01' height='01'/><rect class='w00' x='36' y='21' width='05' height='02'/><rect class='w00' x='37' y='23' width='03' height='01'/><rect class='w01' x='39' y='22' width='01' height='01'/>"],
+            ["", "Closed", "<rect class='w00' x='24' y='22' width='01' height='01'/><rect class='w00' x='25' y='23' width='04' height='01'/><rect class='w00' x='29' y='22' width='01' height='01'/><rect class='w00' x='36' y='22' width='01' height='01'/><rect class='w00' x='37' y='23' width='03' height='01'/><rect class='w00' x='40' y='22' width='01' height='01'/>"],
+            ["", "Crying", "<rect class='w00' x='24' y='21' width='05' height='02'/><rect class='w00' x='29' y='22' width='01' height='02'/><rect class='w00' x='25' y='23' width='04' height='01'/><rect class='w04' x='25' y='22' width='01' height='01'/><rect class='w00' x='36' y='21' width='05' height='02'/><rect class='w00' x='37' y='23' width='03' height='01'/><rect class='w04' x='37' y='22' width='01' height='01'/><rect class='w02' x='24' y='23' width='01' height='08'/><rect class='w02' x='24' y='35' width='01' height='03'/><rect class='w02' x='25' y='40' width='01' height='01'/><rect class='w02' x='26' y='24' width='01' height='03'/><rect class='w02' x='29' y='24' width='01' height='02'/><rect class='w02' x='28' y='26' width='01' height='01'/><rect class='w02' x='27' y='27' width='01' height='02'/><rect class='w02' x='26' y='29' width='01' height='02'/><rect class='w02' x='25' y='31' width='01' height='04'/><rect class='w02' x='26' y='35' width='01' height='02'/><rect class='w02' x='27' y='37' width='01' height='02'/><rect class='w02' x='28' y='39' width='01' height='02'/><rect class='w02' x='29' y='42' width='01' height='02'/><rect class='w02' x='38' y='24' width='01' height='07'/><rect class='w02' x='39' y='31' width='01' height='04'/><rect class='w02' x='38' y='35' width='01' height='05'/><rect class='w02' x='40' y='23' width='01' height='01'/><rect class='w02' x='41' y='24' width='01' height='07'/><rect class='w02' x='42' y='31' width='01' height='03'/>"],
+            ["", "Pink wojak", "<rect class='w04' x='23' y='21' width='06' height='04'/><rect class='w00' x='23' y='21' width='01' height='01'/><rect class='w00' x='24' y='20' width='04' height='01'/><rect class='w00' x='28' y='21' width='01' height='01'/><rect class='w00' x='22' y='22' width='01' height='02'/><rect class='w00' x='29' y='22' width='01' height='02'/><rect class='w00' x='23' y='24' width='01' height='01'/><rect class='w00' x='28' y='24' width='01' height='01'/><rect class='w00' x='24' y='25' width='04' height='01'/><rect class='w00' x='25' y='22' width='02' height='02'/><rect class='w04' x='36' y='21' width='06' height='04'/><rect class='w00' x='36' y='21' width='01' height='01'/><rect class='w00' x='37' y='20' width='04' height='01'/><rect class='w00' x='41' y='21' width='01' height='01'/><rect class='w00' x='35' y='22' width='01' height='02'/><rect class='w00' x='42' y='22' width='01' height='02'/><rect class='w00' x='36' y='24' width='01' height='01'/><rect class='w00' x='41' y='24' width='01' height='01'/><rect class='w00' x='37' y='25' width='04' height='01'/><rect class='w00' x='38' y='22' width='02' height='02'/><rect class='w03' x='24' y='26' width='01' height='05'/><rect class='w03' x='24' y='35' width='01' height='03'/><rect class='w03' x='25' y='40' width='01' height='01'/><rect class='w03' x='26' y='26' width='01' height='01'/><rect class='w03' x='29' y='24' width='01' height='02'/><rect class='w03' x='28' y='26' width='01' height='01'/><rect class='w03' x='27' y='27' width='01' height='02'/><rect class='w03' x='26' y='29' width='01' height='02'/><rect class='w03' x='25' y='31' width='01' height='04'/><rect class='w03' x='26' y='35' width='01' height='02'/><rect class='w03' x='27' y='37' width='01' height='02'/><rect class='w03' x='28' y='39' width='01' height='02'/><rect class='w03' x='29' y='42' width='01' height='02'/><rect class='w03' x='38' y='26' width='01' height='05'/><rect class='w03' x='39' y='31' width='01' height='04'/><rect class='w03' x='38' y='35' width='01' height='05'/><rect class='w03' x='41' y='25' width='01' height='06'/><rect class='w03' x='42' y='31' width='01' height='03'/>"],
+            ["", "Cursed", "<rect class='w00' x='24' y='21' width='01' height='02'/><rect class='w00' x='25' y='20' width='04' height='04'/><rect class='w00' x='29' y='21' width='01' height='03'/><rect class='w00' x='26' y='24' width='03' height='01'/><rect class='w00' x='25' y='27' width='03' height='01'/><rect class='w00' x='28' y='26' width='02' height='01'/><rect class='w00' x='30' y='25' width='01' height='01'/><rect class='w00' x='36' y='21' width='01' height='02'/><rect class='w00' x='37' y='20' width='04' height='04'/><rect class='w00' x='41' y='21' width='01' height='03'/><rect class='w00' x='38' y='24' width='03' height='01'/><rect class='w00' x='36' y='25' width='01' height='01'/><rect class='w00' x='37' y='26' width='02' height='01'/><rect class='w00' x='39' y='27' width='02' height='01'/>"]
         ]
 
         Noses
         [
-            ["", "Wojak", "<rect class='w00'x='30'y='30'width='01'height='01'/><rect class='w00'x='31'y='31'width='01'height='01'/><rect class='w00'x='35'y='31'width='01'height='01'/><rect class='w00'x='36'y='29'width='01'height='02'/><rect class='w00'x='35'y='28'width='01'height='01'/><rect class='w00'x='34'y='25'width='01'height='03'/>"],
-            ["", "NPC", "<rect class='w00'x='33'y='23'width='01'height='02'/><rect class='w00'x='34'y='25'width='01'height='02'/><rect class='w00'x='35'y='27'width='01'height='02'/><rect class='w00'x='36'y='29'width='01'height='01'/><rect class='w00'x='30'y='30'width='07'height='01'/>"],
-            ["", "Dumb wojak", "<rect class='w00'x='30'y='26'width='01'height='03'/><rect class='w00'x='29'y='29'width='01'height='02'/><rect class='w00'x='30'y='31'width='01'height='01'/><rect class='w00'x='35'y='25'width='01'height='03'/><rect class='w00'x='36'y='28'width='01'height='01'/><rect class='w00'x='37'y='29'width='01'height='02'/><rect class='w00'x='36'y='31'width='01'height='01'/>"],
-            ["", "Bladerunner", "<rect class='w06'x='29'y='26'width='02'height='02'/><rect class='w06'x='28'y='27'width='02'height='02'/><rect class='w07'x='31'y='25'width='05'height='03'/><rect class='w06'x='36'y='26'width='03'height='03'/><rect class='w00'x='31'y='24'width='04'height='01'/><rect class='w00'x='29'y='25'width='02'height='01'/><rect class='w00'x='28'y='26'width='01'height='01'/><rect class='w00'x='27'y='27'width='01'height='02'/><rect class='w00'x='28'y='29'width='02'height='01'/><rect class='w00'x='30'y='30'width='01'height='01'/><rect class='w00'x='31'y='31'width='01'height='01'/><rect class='w00'x='30'y='28'width='06'height='01'/><rect class='w00'x='31'y='26'width='01'height='02'/><rect class='w00'x='36'y='27'width='01'height='04'/><rect class='w00'x='35'y='31'width='01'height='01'/><rect class='w00'x='37'y='29'width='02'height='01'/><rect class='w00'x='39'y='28'width='01'height='01'/><rect class='w00'x='38'y='26'width='01'height='02'/><rect class='w00'x='35'y='25'width='03'height='01'/><rect class='w00'x='35'y='26'width='01'height='01'/>"],
-            ["", "Brap", "<rect class='w00'x='34'y='25'width='01'height='03'/><rect class='w00'x='35'y='28'width='01'height='01'/><rect class='w00'x='36'y='29'width='01'height='01'/><rect class='w00'x='34'y='30'width='03'height='01'/><rect class='w00'x='35'y='31'width='01'height='01'/><rect class='w00'x='30'y='30'width='03'height='01'/><rect class='w00'x='31'y='31'width='01'height='01'/><rect class='w08'x='32'y='31'width='01'height='01'/><rect class='w08'x='34'y='31'width='01'height='01'/><rect class='w08'x='32'y='32'width='04'height='01'/><rect class='w08'x='33'y='33'width='01'height='03'/><rect class='w08'x='34'y='35'width='01'height='02'/><rect class='w08'x='35'y='36'width='01'height='03'/><rect class='w08'x='36'y='38'width='01'height='02'/><rect class='w08'x='37'y='39'width='03'height='01'/><rect class='w08'x='39'y='40'width='06'height='01'/><rect class='w08'x='44'y='39'width='02'height='01'/><rect class='w08'x='45'y='38'width='02'height='01'/><rect class='w08'x='46'y='37'width='02'height='01'/><rect class='w08'x='47'y='36'width='03'height='01'/><rect class='w08'x='35'y='33'width='06'height='01'/><rect class='w08'x='37'y='34'width='02'height='01'/><rect class='w08'x='38'y='35'width='06'height='01'/><rect class='w08'x='43'y='34'width='04'height='01'/><rect class='w08'x='46'y='33'width='03'height='01'/><rect class='w08'x='48'y='32'width='02'height='01'/><rect class='w08'x='40'y='32'width='03'height='01'/><rect class='w08'x='42'y='31'width='03'height='01'/><rect class='w08'x='44'y='30'width='03'height='01'/><rect class='w08'x='46'y='29'width='03'height='01'/><rect class='w08'x='48'y='28'width='02'height='01'/><rect class='w08'x='49'y='27'width='01'height='01'/>"]
+            ["", "Wojak", "<rect class='w00' x='30' y='30' width='01' height='01'/><rect class='w00' x='31' y='31' width='01' height='01'/><rect class='w00' x='35' y='31' width='01' height='01'/><rect class='w00' x='36' y='29' width='01' height='02'/><rect class='w00' x='35' y='28' width='01' height='01'/><rect class='w00' x='34' y='25' width='01' height='03'/>"],
+            ["", "NPC", "<rect class='w00' x='33' y='23' width='01' height='02'/><rect class='w00' x='34' y='25' width='01' height='02'/><rect class='w00' x='35' y='27' width='01' height='02'/><rect class='w00' x='36' y='29' width='01' height='01'/><rect class='w00' x='30' y='30' width='07' height='01'/>"],
+            ["", "Dumb wojak", "<rect class='w00' x='30' y='26' width='01' height='03'/><rect class='w00' x='29' y='29' width='01' height='02'/><rect class='w00' x='30' y='31' width='01' height='01'/><rect class='w00' x='35' y='25' width='01' height='03'/><rect class='w00' x='36' y='28' width='01' height='01'/><rect class='w00' x='37' y='29' width='01' height='02'/><rect class='w00' x='36' y='31' width='01' height='01'/>"],
+            ["", "Bladerunner", "<rect class='w06' x='29' y='26' width='02' height='02'/><rect class='w06' x='28' y='27' width='02' height='02'/><rect class='w07' x='31' y='25' width='05' height='03'/><rect class='w06' x='36' y='26' width='03' height='03'/><rect class='w00' x='31' y='24' width='04' height='01'/><rect class='w00' x='29' y='25' width='02' height='01'/><rect class='w00' x='28' y='26' width='01' height='01'/><rect class='w00' x='27' y='27' width='01' height='02'/><rect class='w00' x='28' y='29' width='02' height='01'/><rect class='w00' x='30' y='30' width='01' height='01'/><rect class='w00' x='31' y='31' width='01' height='01'/><rect class='w00' x='30' y='28' width='06' height='01'/><rect class='w00' x='31' y='26' width='01' height='02'/><rect class='w00' x='36' y='27' width='01' height='04'/><rect class='w00' x='35' y='31' width='01' height='01'/><rect class='w00' x='37' y='29' width='02' height='01'/><rect class='w00' x='39' y='28' width='01' height='01'/><rect class='w00' x='38' y='26' width='01' height='02'/><rect class='w00' x='35' y='25' width='03' height='01'/><rect class='w00' x='35' y='26' width='01' height='01'/>"],
+            ["", "Brap", "<rect class='w00' x='34' y='25' width='01' height='03'/><rect class='w00' x='35' y='28' width='01' height='01'/><rect class='w00' x='36' y='29' width='01' height='01'/><rect class='w00' x='34' y='30' width='03' height='01'/><rect class='w00' x='35' y='31' width='01' height='01'/><rect class='w00' x='30' y='30' width='03' height='01'/><rect class='w00' x='31' y='31' width='01' height='01'/><rect class='w08' x='32' y='31' width='01' height='01'/><rect class='w08' x='34' y='31' width='01' height='01'/><rect class='w08' x='32' y='32' width='04' height='01'/><rect class='w08' x='33' y='33' width='01' height='03'/><rect class='w08' x='34' y='35' width='01' height='02'/><rect class='w08' x='35' y='36' width='01' height='03'/><rect class='w08' x='36' y='38' width='01' height='02'/><rect class='w08' x='37' y='39' width='03' height='01'/><rect class='w08' x='39' y='40' width='06' height='01'/><rect class='w08' x='44' y='39' width='02' height='01'/><rect class='w08' x='45' y='38' width='02' height='01'/><rect class='w08' x='46' y='37' width='02' height='01'/><rect class='w08' x='47' y='36' width='03' height='01'/><rect class='w08' x='35' y='33' width='06' height='01'/><rect class='w08' x='37' y='34' width='02' height='01'/><rect class='w08' x='38' y='35' width='06' height='01'/><rect class='w08' x='43' y='34' width='04' height='01'/><rect class='w08' x='46' y='33' width='03' height='01'/><rect class='w08' x='48' y='32' width='02' height='01'/><rect class='w08' x='40' y='32' width='03' height='01'/><rect class='w08' x='42' y='31' width='03' height='01'/><rect class='w08' x='44' y='30' width='03' height='01'/><rect class='w08' x='46' y='29' width='03' height='01'/><rect class='w08' x='48' y='28' width='02' height='01'/><rect class='w08' x='49' y='27' width='01' height='01'/>"]
         ]
 
         Headwares TODO: Feels helmet, Big brain
         [
             ["", "None", ""],
-            ["", "Beanie", "<rect class='w00'x='41'y='10'width='02'height='05'/><rect class='w00'x='38'y='07'width='03'height='07'/><rect class='w00'x='37'y='04'width='01'height='09'/><rect class='w00'x='35'y='03'width='02'height='10'/><rect class='w00'x='32'y='02'width='03'height='11'/><rect class='w00'x='26'y='01'width='06'height='12'/><rect class='w00'x='20'y='01'width='06'height='13'/><rect class='w00'x='18'y='02'width='02'height='13'/><rect class='w00'x='16'y='03'width='02'height='13'/><rect class='w00'x='15'y='04'width='01'height='14'/><rect class='w00'x='14'y='05'width='01'height='14'/><rect class='w00'x='13'y='06'width='01'height='15'/><rect class='w00'x='12'y='07'width='01'height='16'/><rect class='w00'x='10'y='11'width='02'height='13'/><rect class='w00'x='09'y='14'width='01'height='08'/><rect class='w00'x='11'y='09'width='01'height='02'/><rect class='w00'x='16'y='16'width='01'height='01'/><rect class='w00'x='19'y='01'width='01'height='01'/><rect class='w00'x='41'y='09'width='01'height='01'/><rect class='w00'x='39'y='06'width='01'height='01'/><rect class='w00'x='38'y='05'width='01'height='02'/><rect class='w10'x='11'y='19'width='01'height='03'/><rect class='w10'x='12'y='19'width='01'height='01'/><rect class='w10'x='13'y='15'width='01'height='03'/><rect class='w10'x='12'y='17'width='01'height='01'/><rect class='w10'x='15'y='14'width='01'height='02'/><rect class='w10'x='16'y='13'width='01'height='02'/><rect class='w10'x='18'y='12'width='01'height='02'/><rect class='w10'x='19'y='11'width='01'height='02'/><rect class='w10'x='21'y='11'width='02'height='02'/><rect class='w10'x='24'y='11'width='01'height='02'/><rect class='w10'x='25'y='10'width='01'height='02'/><rect class='w10'x='27'y='10'width='02'height='02'/><rect class='w10'x='30'y='10'width='02'height='02'/><rect class='w10'x='33'y='10'width='02'height='02'/><rect class='w10'x='36'y='10'width='02'height='02'/><rect class='w10'x='39'y='11'width='02'height='02'/><rect class='w10'x='41'y='12'width='01'height='02'/>"]
+            ["", "Beanie", "<rect class='w00' x='41' y='10' width='02' height='05'/><rect class='w00' x='38' y='07' width='03' height='07'/><rect class='w00' x='37' y='04' width='01' height='09'/><rect class='w00' x='35' y='03' width='02' height='10'/><rect class='w00' x='32' y='02' width='03' height='11'/><rect class='w00' x='26' y='01' width='06' height='12'/><rect class='w00' x='20' y='01' width='06' height='13'/><rect class='w00' x='18' y='02' width='02' height='13'/><rect class='w00' x='16' y='03' width='02' height='13'/><rect class='w00' x='15' y='04' width='01' height='14'/><rect class='w00' x='14' y='05' width='01' height='14'/><rect class='w00' x='13' y='06' width='01' height='15'/><rect class='w00' x='12' y='07' width='01' height='16'/><rect class='w00' x='10' y='11' width='02' height='13'/><rect class='w00' x='09' y='14' width='01' height='08'/><rect class='w00' x='11' y='09' width='01' height='02'/><rect class='w00' x='16' y='16' width='01' height='01'/><rect class='w00' x='19' y='01' width='01' height='01'/><rect class='w00' x='41' y='09' width='01' height='01'/><rect class='w00' x='39' y='06' width='01' height='01'/><rect class='w00' x='38' y='05' width='01' height='02'/><rect class='w10' x='11' y='19' width='01' height='03'/><rect class='w10' x='12' y='19' width='01' height='01'/><rect class='w10' x='13' y='15' width='01' height='03'/><rect class='w10' x='12' y='17' width='01' height='01'/><rect class='w10' x='15' y='14' width='01' height='02'/><rect class='w10' x='16' y='13' width='01' height='02'/><rect class='w10' x='18' y='12' width='01' height='02'/><rect class='w10' x='19' y='11' width='01' height='02'/><rect class='w10' x='21' y='11' width='02' height='02'/><rect class='w10' x='24' y='11' width='01' height='02'/><rect class='w10' x='25' y='10' width='01' height='02'/><rect class='w10' x='27' y='10' width='02' height='02'/><rect class='w10' x='30' y='10' width='02' height='02'/><rect class='w10' x='33' y='10' width='02' height='02'/><rect class='w10' x='36' y='10' width='02' height='02'/><rect class='w10' x='39' y='11' width='02' height='02'/><rect class='w10' x='41' y='12' width='01' height='02'/>"]
         ]
 
         Accessories
         [
             ["", "None", ""],
-            ["", "Glasses", "<rect class='w00'x='14'y='24'width='01'height='01'/><rect class='w00'x='13'y='22'width='01'height='02'/><rect class='w00'x='14'y='21'width='08'height='01'/><rect class='w00'x='22'y='20'width='01'height='05'/><rect class='w00'x='23'y='19'width='08'height='01'/><rect class='w00'x='31'y='20'width='01'height='05'/><rect class='w00'x='23'y='25'width='08'height='01'/><rect class='w00'x='32'y='21'width='01'height='01'/><rect class='w00'x='33'y='20'width='01'height='01'/><rect class='w00'x='34'y='21'width='01'height='01'/><rect class='w00'x='36'y='19'width='08'height='01'/><rect class='w00'x='35'y='20'width='01'height='05'/><rect class='w00'x='44'y='20'width='01'height='05'/><rect class='w00'x='36'y='25'width='08'height='01'/>"],
-            ["", "Noose", "<rect class='w11'x='02'y='00'width='03'height='16'/><rect class='w11'x='04'y='16'width='03'height='11'/><rect class='w11'x='06'y='27'width='03'height='07'/><rect class='w11'x='08'y='34'width='03'height='04'/><rect class='w11'x='11'y='37'width='01'height='01'/><rect class='w11'x='10'y='38'width='05'height='03'/><rect class='w11'x='15'y='40'width='04'height='03'/><rect class='w11'x='19'y='42'width='15'height='03'/><rect class='w00'x='01'y='00'width='01'height='06'/><rect class='w00'x='02'y='06'width='01'height='10'/><rect class='w00'x='03'y='16'width='01'height='04'/><rect class='w00'x='04'y='20'width='01'height='07'/><rect class='w00'x='05'y='27'width='01'height='03'/><rect class='w00'x='06'y='29'width='01'height='05'/><rect class='w00'x='07'y='34'width='01'height='02'/><rect class='w00'x='08'y='36'width='01'height='02'/><rect class='w00'x='09'y='38'width='01'height='02'/><rect class='w00'x='10'y='39'width='01'height='02'/><rect class='w00'x='11'y='40'width='01'height='01'/><rect class='w00'x='12'y='41'width='03'height='01'/><rect class='w00'x='15'y='42'width='02'height='01'/><rect class='w00'x='17'y='43'width='02'height='01'/><rect class='w00'x='19'y='44'width='05'height='01'/><rect class='w00'x='24'y='45'width='10'height='01'/><rect class='w00'x='34'y='43'width='01'height='02'/><rect class='w00'x='04'y='00'width='01'height='06'/><rect class='w00'x='05'y='06'width='01'height='10'/><rect class='w00'x='06'y='16'width='01'height='04'/><rect class='w00'x='07'y='20'width='01'height='07'/><rect class='w00'x='08'y='27'width='01'height='04'/><rect class='w00'x='09'y='30'width='01'height='04'/><rect class='w00'x='10'y='34'width='01'height='02'/><rect class='w00'x='11'y='36'width='01'height='01'/><rect class='w00'x='12'y='37'width='01'height='01'/><rect class='w00'x='11'y='38'width='04'height='01'/><rect class='w00'x='15'y='39'width='03'height='01'/><rect class='w00'x='18'y='40'width='02'height='01'/><rect class='w00'x='19'y='41'width='06'height='01'/><rect class='w00'x='25'y='42'width='09'height='01'/><rect class='w00'x='02'y='00'width='01'height='01'/><rect class='w00'x='03'y='01'width='01'height='01'/><rect class='w00'x='02'y='03'width='01'height='01'/><rect class='w00'x='03'y='04'width='01'height='01'/><rect class='w00'x='03'y='07'width='01'height='01'/><rect class='w00'x='04'y='08'width='01'height='01'/><rect class='w00'x='03'y='10'width='01'height='01'/><rect class='w00'x='04'y='11'width='01'height='01'/><rect class='w00'x='03'y='13'width='01'height='01'/><rect class='w00'x='04'y='14'width='01'height='01'/><rect class='w00'x='04'y='17'width='01'height='01'/><rect class='w00'x='05'y='18'width='01'height='01'/><rect class='w00'x='05'y='21'width='01'height='01'/><rect class='w00'x='06'y='22'width='01'height='01'/><rect class='w00'x='05'y='25'width='01'height='01'/><rect class='w00'x='06'y='26'width='01'height='01'/><rect class='w00'x='07'y='31'width='01'height='01'/><rect class='w00'x='08'y='34'width='01'height='01'/><rect class='w00'x='09'y='36'width='01'height='01'/><rect class='w00'x='14'y='40'width='02'height='01'/><rect class='w00'x='18'y='42'width='01'height='01'/><rect class='w00'x='22'y='43'width='01'height='01'/><rect class='w00'x='23'y='42'width='01'height='01'/><rect class='w00'x='26'y='44'width='01'height='01'/><rect class='w00'x='27'y='43'width='01'height='01'/><rect class='w00'x='30'y='44'width='01'height='01'/><rect class='w00'x='31'y='43'width='01'height='01'/><rect class='w00'x='33'y='44'width='01'height='01'/>"],
-            ["", "Cigarette", "<rect class='w00'x='28'y='35'width='01'height='01'/><rect class='w00'x='27'y='36'width='03'height='01'/><rect class='w00'x='26'y='37'width='03'height='01'/><rect class='w00'x='25'y='38'width='03'height='01'/><rect class='w00'x='24'y='39'width='03'height='01'/><rect class='w00'x='23'y='40'width='03'height='01'/><rect class='w00'x='24'y='41'width='01'height='01'/><rect class='w01'x='28'y='36'width='01'height='01'/><rect class='w01'x='27'y='37'width='01'height='01'/><rect class='w01'x='26'y='38'width='01'height='01'/><rect class='w01'x='25'y='39'width='01'height='01'/><rect class='w10'x='22'y='27'width='01'height='02'/><rect class='w10'x='23'y='29'width='01'height='03'/><rect class='w10'x='22'y='32'width='01'height='04'/><rect class='w10'x='23'y='36'width='01'height='04'/><rect class='w09'x='24'y='39'width='01'height='01'/>"]
+            ["", "Glasses", "<rect class='w00' x='14' y='24' width='01' height='01'/><rect class='w00' x='13' y='22' width='01' height='02'/><rect class='w00' x='14' y='21' width='08' height='01'/><rect class='w00' x='22' y='20' width='01' height='05'/><rect class='w00' x='23' y='19' width='08' height='01'/><rect class='w00' x='31' y='20' width='01' height='05'/><rect class='w00' x='23' y='25' width='08' height='01'/><rect class='w00' x='32' y='21' width='01' height='01'/><rect class='w00' x='33' y='20' width='01' height='01'/><rect class='w00' x='34' y='21' width='01' height='01'/><rect class='w00' x='36' y='19' width='08' height='01'/><rect class='w00' x='35' y='20' width='01' height='05'/><rect class='w00' x='44' y='20' width='01' height='05'/><rect class='w00' x='36' y='25' width='08' height='01'/>"],
+            ["", "Noose", "<rect class='w11' x='02' y='00' width='03' height='16'/><rect class='w11' x='04' y='16' width='03' height='11'/><rect class='w11' x='06' y='27' width='03' height='07'/><rect class='w11' x='08' y='34' width='03' height='04'/><rect class='w11' x='11' y='37' width='01' height='01'/><rect class='w11' x='10' y='38' width='05' height='03'/><rect class='w11' x='15' y='40' width='04' height='03'/><rect class='w11' x='19' y='42' width='15' height='03'/><rect class='w00' x='01' y='00' width='01' height='06'/><rect class='w00' x='02' y='06' width='01' height='10'/><rect class='w00' x='03' y='16' width='01' height='04'/><rect class='w00' x='04' y='20' width='01' height='07'/><rect class='w00' x='05' y='27' width='01' height='03'/><rect class='w00' x='06' y='29' width='01' height='05'/><rect class='w00' x='07' y='34' width='01' height='02'/><rect class='w00' x='08' y='36' width='01' height='02'/><rect class='w00' x='09' y='38' width='01' height='02'/><rect class='w00' x='10' y='39' width='01' height='02'/><rect class='w00' x='11' y='40' width='01' height='01'/><rect class='w00' x='12' y='41' width='03' height='01'/><rect class='w00' x='15' y='42' width='02' height='01'/><rect class='w00' x='17' y='43' width='02' height='01'/><rect class='w00' x='19' y='44' width='05' height='01'/><rect class='w00' x='24' y='45' width='10' height='01'/><rect class='w00' x='34' y='43' width='01' height='02'/><rect class='w00' x='04' y='00' width='01' height='06'/><rect class='w00' x='05' y='06' width='01' height='10'/><rect class='w00' x='06' y='16' width='01' height='04'/><rect class='w00' x='07' y='20' width='01' height='07'/><rect class='w00' x='08' y='27' width='01' height='04'/><rect class='w00' x='09' y='30' width='01' height='04'/><rect class='w00' x='10' y='34' width='01' height='02'/><rect class='w00' x='11' y='36' width='01' height='01'/><rect class='w00' x='12' y='37' width='01' height='01'/><rect class='w00' x='11' y='38' width='04' height='01'/><rect class='w00' x='15' y='39' width='03' height='01'/><rect class='w00' x='18' y='40' width='02' height='01'/><rect class='w00' x='19' y='41' width='06' height='01'/><rect class='w00' x='25' y='42' width='09' height='01'/><rect class='w00' x='02' y='00' width='01' height='01'/><rect class='w00' x='03' y='01' width='01' height='01'/><rect class='w00' x='02' y='03' width='01' height='01'/><rect class='w00' x='03' y='04' width='01' height='01'/><rect class='w00' x='03' y='07' width='01' height='01'/><rect class='w00' x='04' y='08' width='01' height='01'/><rect class='w00' x='03' y='10' width='01' height='01'/><rect class='w00' x='04' y='11' width='01' height='01'/><rect class='w00' x='03' y='13' width='01' height='01'/><rect class='w00' x='04' y='14' width='01' height='01'/><rect class='w00' x='04' y='17' width='01' height='01'/><rect class='w00' x='05' y='18' width='01' height='01'/><rect class='w00' x='05' y='21' width='01' height='01'/><rect class='w00' x='06' y='22' width='01' height='01'/><rect class='w00' x='05' y='25' width='01' height='01'/><rect class='w00' x='06' y='26' width='01' height='01'/><rect class='w00' x='07' y='31' width='01' height='01'/><rect class='w00' x='08' y='34' width='01' height='01'/><rect class='w00' x='09' y='36' width='01' height='01'/><rect class='w00' x='14' y='40' width='02' height='01'/><rect class='w00' x='18' y='42' width='01' height='01'/><rect class='w00' x='22' y='43' width='01' height='01'/><rect class='w00' x='23' y='42' width='01' height='01'/><rect class='w00' x='26' y='44' width='01' height='01'/><rect class='w00' x='27' y='43' width='01' height='01'/><rect class='w00' x='30' y='44' width='01' height='01'/><rect class='w00' x='31' y='43' width='01' height='01'/><rect class='w00' x='33' y='44' width='01' height='01'/>"],
+            ["", "Cigarette", "<rect class='w00' x='28' y='35' width='01' height='01'/><rect class='w00' x='27' y='36' width='03' height='01'/><rect class='w00' x='26' y='37' width='03' height='01'/><rect class='w00' x='25' y='38' width='03' height='01'/><rect class='w00' x='24' y='39' width='03' height='01'/><rect class='w00' x='23' y='40' width='03' height='01'/><rect class='w00' x='24' y='41' width='01' height='01'/><rect class='w01' x='28' y='36' width='01' height='01'/><rect class='w01' x='27' y='37' width='01' height='01'/><rect class='w01' x='26' y='38' width='01' height='01'/><rect class='w01' x='25' y='39' width='01' height='01'/><rect class='w10' x='22' y='27' width='01' height='02'/><rect class='w10' x='23' y='29' width='01' height='03'/><rect class='w10' x='22' y='32' width='01' height='04'/><rect class='w10' x='23' y='36' width='01' height='04'/><rect class='w09' x='24' y='39' width='01' height='01'/>"]
         ]
 
         */
@@ -1422,20 +1425,92 @@ contract Wojek is ERC721Enumerable, Ownable
     //Mint
     //Lock supply
 
-    function mint() public returns (bool)
+    function _prefixZeros(uint256 value) private pure returns (string memory result)
     {
-        string memory hash = "000000000000000000000000000000000001001";
+        result = WojekHelper.toString(value);
 
-        _tokens[hashTokenIndex(hash)] = hash;
+        if(value > 9)
+        {
+            result = string(abi.encodePacked("0", result));
+        }
+        else
+        {
+            result = string(abi.encodePacked("00", result));
+        }
 
-        _safeMint(msg.sender, totalSupply() + 1);
+        return result;
+    }
+
+    function testRandomHash(uint256 id) public view returns (string memory hash)
+    {
+        uint256 randomNumber = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, id, _currentSeries)));
+
+        for(uint256 i = 0; i < _traitCount; i++)
+        {
+            uint256 trait = randomNumber % 10;
+
+            hash = string(abi.encodePacked(hash, _prefixZeros(trait)));
+
+            randomNumber >>= 12;
+        }
+
+        return string(abi.encodePacked(hash, _prefixZeros(id), _prefixZeros(_currentSeries)));
+    }
+
+    function hashBatch() public returns (bool)
+    {
+        for(uint256 i = 0; i < 25; i++)
+        {
+            _tokenHashes[idToIndex(i)] = testRandomHash(i);
+            _tokenIndexes[i] = idToIndex(i);
+        }
 
         return true;
     }
 
-    function hashExists(string memory hash) public view returns (bool)
+    /*
+    function generateHash() private returns (string memory)
     {
-        if(WojekHelper.stringLength(_tokens[hashTokenIndex(hash)]) != _hashLength)
+        uint256 id = totalSupply();
+
+        uint256 randomNumber = uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, id, _currentSeries)));
+
+
+
+        string memory traits;
+        
+        for(uint256 i = 0; i < _traitCount; i++)
+        {
+
+        }
+
+        string memory phunk;
+
+        return string(abi.encodePacked(traits, phunk));
+    }
+    */
+
+    function mint() public returns (bool)
+    {
+        uint256 supply = totalSupply();
+
+        string memory hash = "000000000000000000000000000000000000001";
+
+        uint256 id = hashToId(hash);
+
+        uint256 index = hashToIndex(hash);
+
+        _tokenHashes[index] = hash;
+        _tokenIndexes[id] = index;
+
+        _safeMint(_msgSender(), supply);
+
+        return true;
+    }
+
+    function hashExists(string memory hash) private view returns (bool)
+    {
+        if(WojekHelper.stringLength(_tokenHashes[hashToId(hash)]) != _hashLength)
         {
             return false;
         }
@@ -1443,42 +1518,29 @@ contract Wojek is ERC721Enumerable, Ownable
         return true;
     }
 
-    function hashId(string memory hash) public pure  returns (uint256)
+    function idToIndex(uint256 id) private view returns (uint256)
+    {
+        return _tokenIndexes[id];
+    }
+
+    function hashToId(string memory hash) private pure  returns (uint256)
     {
         return WojekHelper.parseInt(WojekHelper.substring(hash, 11 * 3, 11 * 3 + 3));
     }
 
-    function hashTokenIndex(string memory hash) public pure returns (uint256)
+    function hashToIndex(string memory hash) private pure returns (uint256)
     {
         //Drop id and series to avoid duplicated attributes
         return WojekHelper.parseInt(WojekHelper.substring(hash, 0, _hashLength - 6));
     }
 
-    function hashMintable(string memory hash) public view returns (bool)
+    function tokenURI(uint256 id) public view override returns (string memory) //BROKEN
     {
-        if(WojekHelper.stringLength(hash) != _hashLength || hashExists(hash))
-        {
-            return false;
-        }
+        require(_exists(id));
 
-        for(uint256 i = 0; i < _traitCount; i++) 
-        {
-            uint256 attributeIndex = WojekHelper.parseInt(WojekHelper.substring(hash, i * 3, i * 3 + 3));
+        uint256 hashIndex = idToIndex(id);
 
-            if(attributeIndex >= _attributes[i].length)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    function tokenURI(uint256 id) public view override returns (string memory)
-    {
-        require (_exists(id));
-
-        string memory hash = _tokens[id];
+        string memory hash = _tokenHashes[hashIndex];
 
         string memory uri = string(abi.encodePacked
         (
@@ -1488,7 +1550,7 @@ contract Wojek is ERC721Enumerable, Ownable
                 bytes(string(abi.encodePacked
                 (
                     '{"name": "Wojek #',
-                    hashId(hash),
+                    WojekHelper.toString(id),
                     '","description": "',
                     "Wojek's display a wide variety of emotions, even the feelsbad ones.", 
                     '","image": "data:image/svg+xml;base64,',
@@ -1503,7 +1565,7 @@ contract Wojek is ERC721Enumerable, Ownable
         return uri;
     }
 
-    function hashMetadata(string memory hash) public view returns(string memory)
+    function hashMetadata(string memory hash) private view returns(string memory)
     {
         string memory metadata;
 
@@ -1525,10 +1587,8 @@ contract Wojek is ERC721Enumerable, Ownable
         return string(abi.encodePacked("[", metadata, "]"));
     }
 
-    function generateSvg(string memory hash) public view returns(string memory) 
+    function generateSvg(string memory hash) private view returns(string memory) 
     {
-        require(hashMintable(hash));
-
         string memory svg = string(abi.encodePacked(_svgHeader, _svgStyles));
 
         for(uint256 i = 0; i < _traitCount; i++) 
@@ -1597,11 +1657,6 @@ contract Wojek is ERC721Enumerable, Ownable
         }
 
         return true;
-    }
-
-    function getAttribute(uint256 attributeType, uint256 attributeIndex) public view returns (Attribute memory)
-    {
-        return _attributes[attributeType][attributeIndex];
     }
 }
 
