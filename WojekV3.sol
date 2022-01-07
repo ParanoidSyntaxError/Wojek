@@ -993,7 +993,7 @@ contract Wojek is ERC721, Ownable
     {
         string trait;
         string value;
-        string svg;
+        uint32[] svg;
     }
 
     uint256 private constant _traitCount = 10;
@@ -1004,20 +1004,20 @@ contract Wojek is ERC721, Ownable
     string private constant _svgStyles = string(abi.encodePacked
     (
         "<style>#wojek-svg{shape-rendering: crispedges;}",
-        ".w00{fill:#000000}", //Black
-        ".w01{fill:#ffffff}", //White
-        ".w02{fill:#00aaff}", //Blue
-        ".w03{fill:#ff0000}", //Red  
-        ".w04{fill:#ff7777}", //Orange pink
-        ".w05{fill:#ff89b9}", //Pink
-        ".w06{fill:#fff9e5}", //Light bandage
-        ".w07{fill:#fff9d5}", //Bandage
-        ".w08{fill:#93c63b}", //Sniff green
-        ".w09{fill:#ff6a00}", //Cig orange
-        ".w10{fill:#808080}", //Smoke gray
-        ".w11{fill:#a94d00}", //Rope brown
-        ".w12{fill:#00ffff}", //Cyan
-        ".w13{fill:#00ff00}", //Green
+        ".w10{fill:#000000}", //Black
+        ".w11{fill:#ffffff}", //White
+        ".w12{fill:#00aaff}", //Blue
+        ".w13{fill:#ff0000}", //Red  
+        ".w14{fill:#ff7777}", //Orange pink
+        ".w15{fill:#ff89b9}", //Pink
+        ".w16{fill:#fff9e5}", //Light bandage
+        ".w17{fill:#fff9d5}", //Bandage
+        ".w18{fill:#93c63b}", //Sniff green
+        ".w19{fill:#ff6a00}", //Cig orange
+        ".w20{fill:#808080}", //Smoke gray
+        ".w21{fill:#a94d00}", //Rope brown
+        ".w22{fill:#00ffff}", //Cyan
+        ".w23{fill:#00ff00}", //Green
         "</style>"
     ));
 
@@ -1040,44 +1040,6 @@ contract Wojek is ERC721, Ownable
         {
             _attributes.push();
         }
-
-        _attributes[0].push(Attribute("Background", "White", "<rect class='w01' x='00' y='00' width='50' height='50'/>"));
-        _attributes[0].push(Attribute("Background", "Cyan", "<rect class='w12' x='00' y='00' width='50' height='50'/>"));
-        _attributes[0].push(Attribute("Background", "Pink", "<rect class='w05' x='00'y='00' width='50'height='50'/>"));
-        _attributes[0].push(Attribute("Background", "Green", "<rect class='w13' x='00' y='00' width='50' height='50'/>"));
-
-        //_attributes[1].push(Attribute("Character", "Wojak", "<rect class='w01' x='15' y='05' width='19' height='45'/><rect class='w01' x='17' y='03' width='18' height='02'/><rect class='w01' x='34' y='05' width='04' height='37'/><rect class='w01' x='38' y='07' width='02' height='33'/><rect class='w01' x='40' y='09' width='02' height='29'/><rect class='w01' x='42' y='14' width='02' height='20'/><rect class='w01' x='44' y='25' width='01' height='05'/><rect class='w01' x='13' y='07' width='02' height='24'/><rect class='w01' x='11' y='11' width='02' height='15'/><rect class='w01' x='34' y='46' width='12' height='04'/><rect class='w01' x='46' y='49' width='03' height='01'/><rect class='w01' x='34' y='45' width='01' height='01'/><rect class='w01' x='46' y='48' width='01' height='01'/><rect class='w01' x='00' y='47' width='15' height='03'/><rect class='w01' x='05' y='45' width='10' height='02'/><rect class='w01' x='11' y='43' width='04' height='02'/><rect class='w01' x='13' y='39' width='02' height='04'/>"));    
-        //_attributes[1].push(Attribute("Character", "NPC", "<rect class='w10' x='15' y='05' width='19' height='45'/><rect class='w10' x='17' y='03' width='18' height='02'/><rect class='w10' x='34' y='05' width='04' height='37'/><rect class='w10' x='38' y='07' width='02' height='33'/><rect class='w10' x='40' y='09' width='02' height='29'/><rect class='w10' x='42' y='14' width='02' height='20'/><rect class='w10' x='44' y='25' width='01' height='05'/><rect class='w10' x='13' y='07' width='02' height='24'/><rect class='w10' x='11' y='11' width='02' height='15'/><rect class='w10' x='34' y='46' width='12' height='04'/><rect class='w10' x='46' y='49' width='03' height='01'/><rect class='w10' x='34' y='45' width='01' height='01'/><rect class='w10' x='46' y='48' width='01' height='01'/><rect class='w10' x='00' y='47' width='15' height='03'/><rect class='w10' x='05' y='45' width='10' height='02'/><rect class='w10' x='11' y='43' width='04' height='02'/><rect class='w10' x='13' y='39' width='02' height='04'/>"));    
-
-        //_attributes[2].push(Attribute("Outline", "Wojak", "<rect class='w00' x='01' y='46' width='04' height='01'/><rect class='w00' x='05' y='45' width='03' height='01'/><rect class='w00' x='08' y='44' width='03' height='01'/><rect class='w00' x='11' y='43' width='01' height='01'/><rect class='w00' x='12' y='42' width='01' height='01'/><rect class='w00' x='13' y='39' width='01' height='03'/><rect class='w00' x='14' y='37' width='01' height='02'/><rect class='w00' x='15' y='32' width='01' height='05'/><rect class='w00' x='14' y='31' width='01' height='01'/><rect class='w00' x='13' y='29' width='01' height='02'/><rect class='w00' x='12' y='26' width='01' height='03'/><rect class='w00' x='11' y='24' width='01' height='02'/><rect class='w00' x='10' y='14' width='01' height='10'/><rect class='w00' x='11' y='11' width='01' height='03'/><rect class='w00' x='12' y='08' width='01' height='03'/><rect class='w00' x='13' y='07' width='01' height='01'/><rect class='w00' x='14' y='06' width='01' height='01'/><rect class='w00' x='15' y='05' width='01' height='01'/><rect class='w00' x='16' y='04' width='01' height='01'/><rect class='w00' x='17' y='03' width='03' height='01'/><rect class='w00' x='20' y='02' width='11' height='01'/><rect class='w00' x='31' y='03' width='04' height='01'/><rect class='w00' x='35' y='04' width='02' height='01'/><rect class='w00' x='37' y='05' width='01' height='01'/><rect class='w00' x='38' y='06' width='01' height='01'/><rect class='w00' x='39' y='07' width='01' height='01'/><rect class='w00' x='40' y='08' width='01' height='01'/><rect class='w00' x='41' y='09' width='01' height='02'/><rect class='w00' x='42' y='11' width='01' height='03'/><rect class='w00' x='43' y='14' width='01' height='03'/><rect class='w00' x='44' y='17' width='01' height='08'/><rect class='w00' x='45' y='25' width='01' height='05'/><rect class='w00' x='44' y='30' width='01' height='02'/><rect class='w00' x='43' y='32' width='01' height='02'/><rect class='w00' x='42' y='34' width='01' height='01'/><rect class='w00' x='41' y='35' width='01' height='03'/><rect class='w00' x='40' y='38' width='01' height='01'/><rect class='w00' x='39' y='39' width='01' height='01'/><rect class='w00' x='38' y='40' width='01' height='01'/><rect class='w00' x='36' y='41' width='02' height='01'/><rect class='w00' x='30' y='42' width='06' height='01'/><rect class='w00' x='28' y='41' width='02' height='01'/><rect class='w00' x='27' y='40' width='01' height='01'/><rect class='w00' x='25' y='39' width='02' height='01'/><rect class='w00' x='24' y='38' width='01' height='01'/><rect class='w00' x='23' y='37' width='01' height='01'/><rect class='w00' x='22' y='36' width='01' height='01'/><rect class='w00' x='21' y='35' width='01' height='01'/><rect class='w00' x='20' y='34' width='01' height='01'/><rect class='w00' x='19' y='31' width='01' height='03'/><rect class='w00' x='18' y='28' width='01' height='03'/><rect class='w00' x='33' y='43' width='01' height='01'/><rect class='w00' x='34' y='44' width='01' height='01'/><rect class='w00' x='35' y='45' width='08' height='01'/><rect class='w00' x='43' y='46' width='03' height='01'/><rect class='w00' x='46' y='47' width='01' height='01'/><rect class='w00' x='47' y='48' width='02' height='01'/><rect class='w00' x='49' y='49' width='01' height='01'/><rect class='w00' x='18' y='36' width='01' height='01'/><rect class='w00' x='19' y='37' width='01' height='02'/><rect class='w00' x='14' y='45' width='02' height='01'/><rect class='w00' x='16' y='44' width='01' height='01'/><rect class='w00' x='17' y='43' width='02' height='01'/><rect class='w00' x='23' y='47' width='02' height='01'/><rect class='w00' x='25' y='48' width='04' height='01'/><rect class='w00' x='29' y='47' width='02' height='01'/>"));
-
-        _attributes[3].push(Attribute("Beard", "None", ""));
-
-        //_attributes[4].push(Attribute("Forehead", "Wojak", "<rect class='w00' x='23' y='11' width='04' height='01'/><rect class='w00' x='27' y='10' width='09' height='01'/><rect class='w00' x='36' y='11' width='03' height='01'/><rect class='w00' x='21' y='15' width='02' height='01'/><rect class='w00' x='23' y='14' width='06' height='01'/><rect class='w00' x='29' y='13' width='07' height='01'/><rect class='w00' x='36' y='14' width='02' height='01'/><rect class='w00' x='23' y='19' width='02' height='01'/><rect class='w00' x='25' y='18' width='04' height='01'/><rect class='w00' x='36' y='18' width='04' height='01'/><rect class='w00' x='40' y='19' width='02' height='01'/>"));
-        //_attributes[4].push(Attribute("Forehead", "NPC", ""));
-        //_attributes[4].push(Attribute("Forehead", "Smug", "<rect class='w00' x='21' y='10' width='02' height='01'/><rect class='w00' x='23' y='09' width='03' height='01'/><rect class='w00' x='26' y='08' width='10' height='01'/><rect class='w00' x='36' y='09' width='02' height='01'/><rect class='w00' x='38' y='10' width='01' height='01'/><rect class='w00' x='26' y='11' width='02' height='01'/><rect class='w00' x='28' y='10' width='04' height='01'/><rect class='w00' x='32' y='11' width='04' height='01'/><rect class='w00' x='23' y='18' width='03' height='01'/><rect class='w00' x='26' y='17' width='02' height='01'/><rect class='w00' x='28' y='16' width='02' height='01'/><rect class='w00' x='30' y='15' width='01' height='01'/><rect class='w00' x='35' y='17' width='01' height='01'/><rect class='w00' x='36' y='18' width='06' height='01'/><rect class='w00' x='42' y='19' width='01' height='01'/>"));
-        //_attributes[4].push(Attribute("Forehead", "Bloomer", "<rect class='w00' x='28' y='34' width='09' height='04'/><rect class='w00' x='26' y='33' width='07' height='01'/><rect class='w00' x='27' y='32' width='01' height='04'/><rect class='w00' x='37' y='35' width='01' height='02'/><rect class='w00' x='29' y='38' width='07' height='01'/><rect class='w00' x='31' y='39' width='04' height='01'/><rect class='w01' x='31' y='34' width='02' height='01'/><rect class='w01' x='33' y='35' width='02' height='01'/><rect class='w01' x='31' y='38' width='03' height='01'/><rect class='w01' x='30' y='37' width='01' height='01'/>"));
-        //_attributes[4].push(Attribute("Forehead", "Soyjak", "<rect class='w00' x='29' y='33' width='08' height='06'/><rect class='w00' x='28' y='34' width='01' height='03'/><rect class='w00' x='37' y='34' width='01' height='03'/><rect class='w00' x='30' y='39' width='06' height='01'/><rect class='w00' x='27' y='32' width='01' height='01'/><rect class='w00' x='26' y='33' width='01' height='03'/><rect class='w00' x='38' y='32' width='01' height='01'/><rect class='w00' x='39' y='33' width='01' height='02'/><rect class='w01' x='30' y='34' width='01' height='01'/><rect class='w01' x='32' y='34' width='01' height='01'/><rect class='w01' x='34' y='34' width='01' height='01'/>"));
-
-        //_attributes[5].push(Attribute("Mouth", "Wojak", "<rect class='w00' x='28' y='35' width='05' height='01'/><rect class='w00' x='33' y='36' width='05' height='01'/>"));
-        //_attributes[5].push(Attribute("Mouth", "NPC", ""));
-        //_attributes[5].push(Attribute("Mouth", "Dumb wojak", "<rect class='w00' x='28' y='34' width='11' height='01'/><rect class='w00' x='29' y='35' width='09' height='01'/><rect class='w02' x='28' y='35' width='01' height='04'/><rect class='w02' x='30' y='36' width='01' height='02'/>"));
-        //_attributes[5].push(Attribute("Mouth", "Pink wojak", "<rect class='w00' x='29' y='33' width='08' height='06'/><rect class='w00' x='28' y='34' width='01' height='04'/><rect class='w00' x='37' y='34' width='01' height='04'/><rect class='w01' x='29' y='34' width='01' height='01'/><rect class='w01' x='31' y='34' width='02' height='01'/><rect class='w01' x='34' y='34' width='02' height='01'/><rect class='w01' x='29' y='37' width='01' height='01'/><rect class='w01' x='31' y='37' width='02' height='01'/><rect class='w01' x='34' y='37' width='02' height='01'/>"));
-        //_attributes[5].push(Attribute("Mouth", "Smug", "<rect class='w00' x='27' y='33' width='01' height='01'/><rect class='w00' x='26' y='34' width='02' height='01'/><rect class='w00' x='28' y='35' width='04' height='01'/><rect class='w00' x='32' y='36' width='06' height='01'/>"));
-        //_attributes[5].push(Attribute("Mouth", "Bloomer", "<rect class='w00' x='28' y='34' width='09' height='04'/><rect class='w00' x='26' y='33' width='07' height='01'/><rect class='w00' x='27' y='32' width='01' height='04'/><rect class='w00' x='37' y='35' width='01' height='02'/><rect class='w00' x='29' y='38' width='07' height='01'/><rect class='w00' x='31' y='39' width='04' height='01'/><rect class='w01' x='31' y='34' width='02' height='01'/><rect class='w01' x='33' y='35' width='02' height='01'/><rect class='w01' x='31' y='38' width='03' height='01'/><rect class='w01' x='30' y='37' width='01' height='01'/>"));
-        //_attributes[5].push(Attribute("Mouth", "Soyjak", "<rect class='w00' x='29' y='33' width='08' height='06'/><rect class='w00' x='28' y='34' width='01' height='03'/><rect class='w00' x='37' y='34' width='01' height='03'/><rect class='w00' x='30' y='39' width='06' height='01'/><rect class='w00' x='27' y='32' width='01' height='01'/><rect class='w00' x='26' y='33' width='01' height='03'/><rect class='w00' x='38' y='32' width='01' height='01'/><rect class='w00' x='39' y='33' width='01' height='02'/><rect class='w01' x='30' y='34' width='01' height='01'/><rect class='w01' x='32' y='34' width='01' height='01'/><rect class='w01' x='34' y='34' width='01' height='01'/>"));
-
-        //_attributes[6].push(Attribute("Eye", "Wojak", "<rect class='w00' x='24' y='21' width='05' height='02'/><rect class='w00' x='29' y='22' width='01' height='02'/><rect class='w00' x='25' y='23' width='04' height='01'/><rect class='w01' x='25' y='22' width='01' height='01'/><rect class='w00' x='36' y='21' width='05' height='02'/><rect class='w00' x='37' y='23' width='03' height='01'/><rect class='w01' x='37' y='22' width='01' height='01'/>"));
-
-        //_attributes[7].push(Attribute("Nose", "Wojak", "<rect class='w00' x='30' y='30' width='01' height='01'/><rect class='w00' x='31' y='31' width='01' height='01'/><rect class='w00' x='35' y='31' width='01' height='01'/><rect class='w00' x='36' y='29' width='01' height='02'/><rect class='w00' x='35' y='28' width='01' height='01'/><rect class='w00' x='34' y='25' width='01' height='03'/>"));
-        //_attributes[7].push(Attribute("Nose", "NPC", "<rect class='w00' x='33' y='23' width='01' height='02'/><rect class='w00' x='34' y='25' width='01' height='02'/><rect class='w00' x='35' y='27' width='01' height='02'/><rect class='w00' x='36' y='29' width='01' height='01'/><rect class='w00' x='30' y='30' width='07' height='01'/>"));
-        //_attributes[7].push(Attribute("Nose", "Dumb wojak", "<rect class='w00' x='30' y='26' width='01' height='03'/><rect class='w00' x='29' y='29' width='01' height='02'/><rect class='w00' x='30' y='31' width='01' height='01'/><rect class='w00' x='35' y='25' width='01' height='03'/><rect class='w00' x='36' y='28' width='01' height='01'/><rect class='w00' x='37' y='29' width='01' height='02'/><rect class='w00' x='36' y='31' width='01' height='01'/>"));
-        //_attributes[7].push(Attribute("Nose", "Bladerunner", "<rect class='w06' x='29' y='26' width='02' height='02'/><rect class='w06' x='28' y='27' width='02' height='02'/><rect class='w07' x='31' y='25' width='05' height='03'/><rect class='w06' x='36' y='26' width='03' height='03'/><rect class='w00' x='31' y='24' width='04' height='01'/><rect class='w00' x='29' y='25' width='02' height='01'/><rect class='w00' x='28' y='26' width='01' height='01'/><rect class='w00' x='27' y='27' width='01' height='02'/><rect class='w00' x='28' y='29' width='02' height='01'/><rect class='w00' x='30' y='30' width='01' height='01'/><rect class='w00' x='31' y='31' width='01' height='01'/><rect class='w00' x='30' y='28' width='06' height='01'/><rect class='w00' x='31' y='26' width='01' height='02'/><rect class='w00' x='36' y='27' width='01' height='04'/><rect class='w00' x='35' y='31' width='01' height='01'/><rect class='w00' x='37' y='29' width='02' height='01'/><rect class='w00' x='39' y='28' width='01' height='01'/><rect class='w00' x='38' y='26' width='01' height='02'/><rect class='w00' x='35' y='25' width='03' height='01'/><rect class='w00' x='35' y='26' width='01' height='01'/>"));
-        //_attributes[7].push(Attribute("Nose", "Brap", "<rect class='w00' x='34' y='25' width='01' height='03'/><rect class='w00' x='35' y='28' width='01' height='01'/><rect class='w00' x='36' y='29' width='01' height='01'/><rect class='w00' x='34' y='30' width='03' height='01'/><rect class='w00' x='35' y='31' width='01' height='01'/><rect class='w00' x='30' y='30' width='03' height='01'/><rect class='w00' x='31' y='31' width='01' height='01'/><rect class='w08' x='32' y='31' width='01' height='01'/><rect class='w08' x='34' y='31' width='01' height='01'/><rect class='w08' x='32' y='32' width='04' height='01'/><rect class='w08' x='33' y='33' width='01' height='03'/><rect class='w08' x='34' y='35' width='01' height='02'/><rect class='w08' x='35' y='36' width='01' height='03'/><rect class='w08' x='36' y='38' width='01' height='02'/><rect class='w08' x='37' y='39' width='03' height='01'/><rect class='w08' x='39' y='40' width='06' height='01'/><rect class='w08' x='44' y='39' width='02' height='01'/><rect class='w08' x='45' y='38' width='02' height='01'/><rect class='w08' x='46' y='37' width='02' height='01'/><rect class='w08' x='47' y='36' width='03' height='01'/><rect class='w08' x='35' y='33' width='06' height='01'/><rect class='w08' x='37' y='34' width='02' height='01'/><rect class='w08' x='38' y='35' width='06' height='01'/><rect class='w08' x='43' y='34' width='04' height='01'/><rect class='w08' x='46' y='33' width='03' height='01'/><rect class='w08' x='48' y='32' width='02' height='01'/><rect class='w08' x='40' y='32' width='03' height='01'/><rect class='w08' x='42' y='31' width='03' height='01'/><rect class='w08' x='44' y='30' width='03' height='01'/><rect class='w08' x='46' y='29' width='03' height='01'/><rect class='w08' x='48' y='28' width='02' height='01'/><rect class='w08' x='49' y='27' width='01' height='01'/>"));
-
-        _attributes[8].push(Attribute("Hat", "None", ""));
-
-        _attributes[9].push(Attribute("Accessory", "None", ""));
     }
 
     /* Hashing standard (hash reads left to right)
@@ -1095,10 +1057,27 @@ contract Wojek is ERC721, Ownable
         Phunk       10
     */
 
-    //1001000001000001000001001001000
-    //1000000001000001000001001001000
-    //1001000000000001000001001001000
-    //1001000001000000000001001001000
+    //Hash
+    //1000000000000000000000000000000000
+    //1001002003004005006007008009010011
+
+    //Attribute
+    /*
+        [[
+            ["aa", "bb", [1101020304]],
+            ["aa", "bb", [1101020304]],
+            ["aa", "bb", [1101020304]],
+            ["aa", "bb", [1101020304]],
+            ["aa", "bb", [1101020304]],
+            ["aa", "bb", [1101020304]],
+            ["aa", "bb", [1101020304]],
+            ["aa", "bb", [1101020304]],
+            ["aa", "bb", [1101020304]],
+            ["aa", "bb", [1101020304]],
+            ["aa", "bb", [1101020304]]
+        ]]
+    */
+
 
     function lockSupply() external onlyOwner returns (bool)
     {
@@ -1148,37 +1127,13 @@ contract Wojek is ERC721, Ownable
 
     function tokenURI(uint256 id) public view override returns (string memory) //BROKEN
     {
-        require(_exists(id));
 
-        uint256 hash = _tokenHashes[id];
-
-        require(_mintedTokens[hash] == true);
-
-        string memory uri = string(abi.encodePacked
-        (
-            "data:application/json;base64,",
-            _encode
-            (
-                bytes(string(abi.encodePacked
-                (
-                    '{"name": "Wojek #',
-                    _toString(id),
-                    '","description": "',
-                    "Wojek's display a wide variety of emotions, even the feelsbad ones.", 
-                    '","image": "data:image/svg+xml;base64,',
-                    _encode(bytes(_generateSvg(hash))),
-                    '","attributes":',
-                    _hashMetadata(hash),
-                    "}"
-                )))
-            )
-        ));
-
-        return uri;
     }
 
-    function _generateSvg(uint256 hash) private view returns(string memory) 
+    function _generateSvg() public view returns(string memory) 
     {
+        uint256 hash = 1000000000000000000000000000000000;
+
         string memory xScale = "1";
 
         if(_splitHash(hash, 10) > 0)
@@ -1193,7 +1148,17 @@ contract Wojek is ERC721, Ownable
         {
             uint256 attributeIndex = _splitHash(hash, i);
 
-            svg = string(abi.encodePacked(svg, _attributes[i][attributeIndex].svg));
+            for(uint256 a = 0; a < _attributes[i][attributeIndex].svg.length; a++)
+            {
+                svg = string(abi.encodePacked(svg, 
+                    "<rect class='w", _toString(_splitSVG(_attributes[i][attributeIndex].svg[a], 0)), 
+                    "' x='", _toString(_splitSVG(_attributes[i][attributeIndex].svg[a], 1)), 
+                    "' y='", _toString(_splitSVG(_attributes[i][attributeIndex].svg[a], 2)), 
+                    "' width='", _toString(_splitSVG(_attributes[i][attributeIndex].svg[a], 3)), 
+                    "' height='", _toString(_splitSVG(_attributes[i][attributeIndex].svg[a], 4)), 
+                    "'/>"
+                ));
+            }
         }
 
         return string(abi.encodePacked(svg, "</svg>"));
@@ -1201,38 +1166,25 @@ contract Wojek is ERC721, Ownable
 
     function _hashMetadata(uint256 hash) private view returns(string memory)
     {
-        string memory metadata;
 
-        for(uint256 i = 0; i < _traitCount; i++) 
+    }
+
+    function addToAllAttributes(Attribute[][] memory newAttributes) external onlyOwner returns (bool)
+    {
+        for(uint256 a = 0; a < newAttributes.length; a++)
         {
-            uint256 attributeIndex = _splitHash(hash, i);
-
-            metadata = string(abi.encodePacked
-            (
-                metadata,
-                '{"trait_type":"',
-                _attributes[i][attributeIndex].trait,
-                '","value":"',
-                _attributes[i][attributeIndex].value,
-                '"}'
-            ));
+            for(uint256 i = 0; i < newAttributes.length; i++)
+            {
+                _attributes[a].push(Attribute
+                (
+                    newAttributes[a][i].trait,
+                    newAttributes[a][i].value,
+                    newAttributes[a][i].svg
+                ));
+            }
         }
 
-        if(_splitHash(hash, 10) > 0)
-        {
-            //Phunked
-            metadata = string(abi.encodePacked
-            (
-                metadata,
-                '{"trait_type":"',
-                "Phunk",
-                '","value":"',
-                "Phunked",
-                '"}'
-            ));
-        }
-
-        return string(abi.encodePacked("[", metadata, "]"));
+        return true;
     }
 
     function addAttributes(uint256 attributeType, Attribute[] memory newAttributes) external onlyOwner returns(bool)
@@ -1255,9 +1207,14 @@ contract Wojek is ERC721, Ownable
         return uint256(keccak256(abi.encodePacked(type(uint256).max, block.difficulty, block.timestamp, seed)));
     }
 
-    function _splitHash(uint256 hash, uint256 attributeIndex) private pure returns (uint256)
+    function _splitSVG(uint32 svg, uint32 index) public pure returns (uint256)
     {
-        return ((hash - 10 ** _hashLength) / (10 ** (_hashLength - (attributeIndex * 3)))) % 1000;
+        return (svg / (10 ** (10 - (index * 2) - 2))) % 100;
+    }
+
+    function _splitHash(uint256 hash, uint256 attributeIndex) public pure returns (uint256)
+    {
+        return ((hash - 10 ** _hashLength) / (10 ** (_hashLength - (attributeIndex * 3) - 3))) % 1000;
     }
 
     function _toString(uint256 value) private pure returns (string memory) {
