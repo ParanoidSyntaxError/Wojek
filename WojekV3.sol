@@ -993,6 +993,7 @@ contract Wojek is ERC721, Ownable
     {
         string trait;
         string value;
+        uint32 rectCount;
         uint32[] svg;
     }
 
@@ -1021,9 +1022,9 @@ contract Wojek is ERC721, Ownable
         "</style>"
     ));
 
-    Attribute[][] private _attributes;
-    mapping(uint256 => bool) private _mintedTokens;     //Hash => Is minted
-    mapping(uint256 => uint256) private _tokenHashes;   //Id => Hash
+    Attribute[][] public _attributes;
+    mapping(uint256 => bool) public _mintedTokens;     //Hash => Is minted
+    mapping(uint256 => uint256) public _tokenHashes;   //Id => Hash
 
     //uint256[] private _series
 
@@ -1031,7 +1032,12 @@ contract Wojek is ERC721, Ownable
 
     bool private _supplyLocked;
 
+    uint256 private _mintCost;
+    uint256 private _mintsLeft;
+
     uint256 private _currentSeries;
+
+    uint256[] _seriesIndexes;
 
     constructor() ERC721("Wojek", "WOJEK")
     {
@@ -1040,6 +1046,93 @@ contract Wojek is ERC721, Ownable
         {
             _attributes.push();
         }
+    }
+
+    function finishSeries() external onlyOwner returns (bool)
+    {
+        _seriesIndexes.push(_totalSupply);
+
+        _currentSeries++;
+
+        return true;
+    }
+
+    function startMint(uint256 amount, uint256 cost) external onlyOwner returns (bool)
+    {
+        _mintCost = cost;
+        _mintsLeft = amount;
+
+        return true;
+    }
+
+    function endMint() external onlyOwner returns (bool)
+    {
+        _mintsLeft = 0;
+
+        return true;
+    }
+
+    function mintHashes(uint256[] memory hashes) external onlyOwner returns (bool)
+    {
+        require(_supplyLocked == false);
+
+        address sender = _msgSender();
+
+        uint256 initialSupply = _totalSupply;
+
+        uint256 mintedCount;
+
+        for(uint256 i = 0; i < hashes.length; i++)
+        {
+            _mintedTokens[hashes[i]] = true;
+            _tokenHashes[initialSupply + mintedCount] = hashes[i];
+
+            _safeMint(sender, initialSupply + mintedCount);
+            mintedCount++;
+        }
+
+        _totalSupply += mintedCount;
+
+        return true;
+    }
+
+    function mint() public payable returns (bool)
+    {
+        require(_supplyLocked == false);
+        require(_mintsLeft > 0);
+        require(msg.value >= _mintCost);
+
+        uint256 supply = _totalSupply;
+
+        address sender = _msgSender();
+
+        uint256 randomNumber = _dirtyRandom(supply);
+
+        uint256 hash = 10 ** _hashLength;
+
+        for(uint256 i = 0; i < _traitCount; i++)
+        {
+            hash += (10 ** (_hashLength - (i * 3) - 3)) * (randomNumber % _attributes[i].length);
+
+            randomNumber >>= 8;
+        }
+
+        if(randomNumber % 100 < 5)
+        {
+            hash += 1; 
+        }
+
+        require(_mintedTokens[hash] == false);
+
+        _mintedTokens[hash] = true;
+        _tokenHashes[supply] = hash;
+
+        _safeMint(sender, supply);
+
+        _mintsLeft--;
+        _totalSupply++;
+
+        return true;
     }
 
     /* Hashing standard (hash reads left to right)
@@ -1056,84 +1149,139 @@ contract Wojek is ERC721, Ownable
         Accessory   9
         Phunk       10
     */
-
-    //Hash
-    //1000000000000000000000000000000000
+    
     //1001002003004005006007008009010011
 
-    //Attribute
-    /*
-        [[
-            ["aa", "bb", [1101020304]],
-            ["aa", "bb", [1101020304]],
-            ["aa", "bb", [1101020304]],
-            ["aa", "bb", [1101020304]],
-            ["aa", "bb", [1101020304]],
-            ["aa", "bb", [1101020304]],
-            ["aa", "bb", [1101020304]],
-            ["aa", "bb", [1101020304]],
-            ["aa", "bb", [1101020304]],
-            ["aa", "bb", [1101020304]],
-            ["aa", "bb", [1101020304]]
-        ]]
+    /* Debug attributes
+
+        [[["aa", "bb", 1, [1101020304]],["aa", "bb", 1, [1101020304]]],
+        [["aa", "bb", 1, [1101020304]],["aa", "bb", 1, [1101020304]]],
+        [["aa", "bb", 1, [1101020304]],["aa", "bb", 1, [1101020304]]],
+        [["aa", "bb", 1, [1101020304]],["aa", "bb", 1, [1101020304]]],
+        [["aa", "bb", 1, [1101020304]],["aa", "bb", 1, [1101020304]]],
+        [["aa", "bb", 1, [1101020304]],["aa", "bb", 1, [1101020304]]],
+        [["aa", "bb", 1, [1101020304]],["aa", "bb", 1, [1101020304]]],
+        [["aa", "bb", 1, [1101020304]],["aa", "bb", 1, [1101020304]]],
+        [["aa", "bb", 1, [1101020304]],["aa", "bb", 1, [1101020304]]],
+        [["aa", "bb", 1, [1101020304]],["aa", "bb", 1, [1101020304]]]]
     */
 
+    /* Attributes
 
-    function lockSupply() external onlyOwner returns (bool)
+        //Backgrounds
+        [
+            ["Background", "White", 1, [1100005050]],
+            ["Background", "Cyan", 1, [2200005050]],
+            ["Background", "Pink", 1, [1500005050]],
+            ["Background", "Green", 1, [2300005050]]
+        ]
+
+        //Characters
+        [
+            ["Character", "Wojak", 17, [1115051945,1117031802,1134050437,1138070233,1140090229,1142140220,1144250105,1113070224,1111110215,1134461204,1146490301,1134450101,1146480101,1100471503,1105451002,1111430402,1113390204]],
+            ["Character", "NPC", 17, [2015051945,2017031802,2034050437,2038070233,2040090229,2042140220,2044250105,2013070224,2011110215,2034461204,2046490301,2034450101,2046480101,2000471503,2005451002,2011430402,2013390204]],
+            ["Character", "Pink wojak", 17, [1515051945,1517031802,1534050437,1538070233,1540090229,1542140220,1544250105,1513070224,1511110215,1534461204,1546490301,1534450101,1546480101,1500471503,1505451002,1511430402,1513390204]],
+            ["Character", "Green wojak", 17, [2315051945,2317031802,2334050437,2338070233,2340090229,2342140220,2344250105,2313070224,2311110215,2334461204,2346490301,2334450101,2346480101,2300471503,2305451002,2311430402,2313390204]]
+        ]
+
+        //Outlines
+        [
+            ["Outline", "Wojak", 67, [1000470101,1001460401,1005450301,1008440301,1011430101,1012420101,1013390103,1014370102,1015320105,1014310101,1013290102,1012260103,1011240102,1010140110,1011110103,1012080103,1013070101,1014060101,1015050101,1016040101,1017030301,1020021101,1031030401,1035040201,1037050101,1038060101,1039070101,1040080101,1041090102,1042110103,1043140103,1044170108,1045250105,1044300102,1043320102,1042340101,1041350103,1040380101,1039390101,1038400101,1036410201,1030420601,1028410201,1027400101,1025390201,1024380101,1023370101,1022360101,1021350101,1020340101,1019310103,1018280103,1033430101,1034440101,1035450801,1043460301,1046470101,1047480201,1049490101,1018360101,1019370102,1014450201,1016440101,1017430201,1023470201,1025480401,1029470201]]
+        ]
+
+        //Beards TODO: Soyjak, Shadow
+        [
+            ["Beard", "None", 0, []]
+        ]
+
+        //Forehead
+        [
+            ["Forehead", "Wojak", 11, [1023110401,1027100901,1036110301,1021150201,1023140601,1029130701,1036140201,1023190201,1025180401,1036180401,1040190201]],
+            ["Forehead", "NPC", 0, []],
+            ["Forehead", "Smug", 15, [1021100201,1023090301,1026081001,1036090201,1038100101,1026110201,1028100401,1032110401,1023180301,1026170201,1028160201,1030150101,1035170101,1036180601,1042190101]],
+            ["Forehead", "Soyjak", 17, [1021050401,1025060901,1023090601,1029100501,1034090301,1020160101,1021150101,1022140201,1024130401,1028140201,1030150101,1031160102,1034160102,1035150101,1036140201,1038130301,1041140201]],
+            ["Forehead", "Pink wojak", 20, [1029090102,1030110103,1029140102,1023140201,1025150201,1027160101,1021190101,1022180601,1028190201,1030200101,1036100101,1035110102,1034130103,1035160101,1037150201,1039140101,1040130101,1034200101,1035190201,1037180501]]
+        ]
+
+        //Mouths
+        [
+            ["Mouth", "Wojak", 2, [1028350501,1033360501]],
+            ["Mouth", "NPC", 1, [1029350801]],
+            ["Mouth", "Dumb", 4, [1028341101,1029350901,1228350104,1230360102]],
+            ["Mouth", "Pink wojak", 9, [1029330806,1028340104,1037340104,1129340101,1131340201,1134340201,1129370101,1131370201,1134370201]],
+            ["Mouth", "Smug", 4, [1027330101,1026340201,1028350401,1032360601]],
+            ["Mouth", "Bloomer", 10, [1028340904,1026330701,1027320104,1037350102,1029380701,1031390401,1131340201,1133350201,1131380301,1130370101]],
+            ["Mouth", "Soyjak", 11, [1029330806,1028340103,1037340103,1030390601,1027320101,1026330103,1038320101,1039330102,1130340101,1132340101,1134340101]]
+        ]
+
+        //Eyes
+        [
+            ["Eye", "Wojak", 7, [1024210502,1029220102,1025230401,1125220101,1036210502,1037230301,1137220101]],
+            ["Eye", "NPC", 2, [1026210303,1037210303]],
+            ["Eye", "Smug", 7, [1024210502,1029220102,1025230401,1128220101,1036210502,1037230301,1139220101]],
+            ["Eye", "Closed", 6, [1024220101,1025230401,1029220101,1036220101,1037230301,1040220101]],
+            ["Eye", "Crying", 26, [1024210502,1029220102,1025230401,1425220101,1036210502,1037230301,1437220101,1224230108,1224350103,1225400101,1226240103,1229240102,1228260101,1227270102,1226290102,1225310104,1226350102,1227370102,1228390102,1229420102,1238240107,1239310104,1238350105,1240230101,1241240107,1242310103]],
+            ["Eye", "Pink wojak", 38, [1423210604,1023210101,1024200401,1028210101,1022220102,1029220102,1023240101,1028240101,1024250401,1025220202,1436210604,1036210101,1037200401,1041210101,1035220102,1042220102,1036240101,1041240101,1037250401,1038220202,1324260105,1324350103,1325400101,1326260101,1329240102,1328260101,1327270102,1326290102,1325310104,1326350102,1327370102,1328390102,1329420102,1338260105,1339310104,1338350105,1341250106,1342310103]],
+            ["Eye", "Cursed", 14, [1024210102,1025200404,1029210103,1026240301,1025270301,1028260201,1030250101,1036210102,1037200404,1041210103,1038240301,1036250101,1037260201,1039270201]]
+        ]
+
+        //Noses
+        [
+            ["Nose", "Wojak", 6, [1030300101,1031310101,1035310101,1036290102,1035280101,1034250103]],
+            ["Nose", "NPC", 5, [1033230102,1034250102,1035270102,1036290101,1030300701]],
+            ["Nose", "Dumb", 7, [1030260103,1029290102,1030310101,1035250103,1036280101,1037290102,1036310101]],
+            ["Nose", "Bladerunner", 20, [1629260202,1628270202,1731250503,1636260303,1031240401,1029250201,1028260101,1027270102,1028290201,1030300101,1031310101,1030280601,1031260102,1036270104,1035310101,1037290201,1039280101,1038260102,1035250301,1035260101]],
+            ["Nose", "Sniff", 32, [1034250103,1035280101,1036290101,1034300301,1035310101,1030300301,1031310101,1832310101,1834310101,1832320401,1833330103,1834350102,1835360103,1836380102,1837390301,1839400601,1844390201,1845380201,1846370201,1847360301,1835330601,1837340201,1838350601,1843340401,1846330301,1848320201,1840320301,1842310301,1844300301,1846290301,1848280201,1849270101]]
+        ]
+
+        //Hats TODO: Big brain, Feels helmat
+        [
+            ["Hat", "None", 0, []],
+            ["Hat", "Beanie", 38, [1041100205,1038070307,1037040109,1035030210,1032020311,1026010612,1020010613,1018020213,1016030213,1015040114,1014050114,1013060115,1012070116,1010110213,1009140108,1011090102,1016160101,1019010101,1041090101,1039060101,1038050102,2011190103,2012190101,2013150103,2012170101,2015140102,2016130102,2018120102,2019110102,2021110202,2024110102,2025100102,2027100202,2030100202,2033100202,2036100202,2039110202,2041120102]]
+        ]
+
+        //Accessories
+        [
+            ["Accessory", "None", 0, []],
+            ["Accessory", "Cigarette", 16, [1028350101,1027360301,1026370301,1025380301,1024390301,1023400301,1024410101,1128360101,1127370101,1126380101,1125390101,2022270102,2023290103,2022320104,2023360104,1924390101]],
+            ["Accessory", "Noose", 67, [2102000316,2104160311,2106270307,2108340304,2111370101,2110380503,2115400403,2119421503,1001000106,1002060110,1003160104,1004200107,1005270103,1006290105,1007340102,1008360102,1009380102,1010390102,1011400101,1012410301,1015420201,1017430201,1019440501,1024451001,1034430102,1004000106,1005060110,1006160104,1007200107,1008270104,1009300104,1010340102,1011360101,1012370101,1011380401,1015390301,1018400201,1019410601,1025420901,1002000101,1003010101,1002030101,1003040101,1003070101,1004080101,1003100101,1004110101,1003130101,1004140101,1004170101,1005180101,1005210101,1006220101,1005250101,1006260101,1007310101,1008340101,1009360101,1014400201,1018420101,1022430101,1023420101,1026440101,1027430101,1030440101,1031430101,1033440101]],
+            ["Accessory", "Glasses", 14, [1014240101,1013220102,1014210801,1022200105,1023190801,1031200105,1023250801,1032210101,1033200101,1034210101,1036190801,1035200105,1044200105,1036250801]]
+        ]
+    */
+
+    function tokenURI(uint256 id) public view override returns (string memory)
     {
-        _supplyLocked = true;
+        //require(_exists(id));
 
-        return true;
+        uint256 hash = _tokenHashes[id];
+
+        //require(_mintedTokens[hash] == true);
+
+        string memory uri = string(abi.encodePacked
+        (
+            "data:application/json;base64,",
+            _encode
+            (
+                bytes(string(abi.encodePacked
+                (
+                    '{"name": "Wojek #',
+                    _toString(id),
+                    '","description": "',
+                    "Wojek's display a wide variety of emotions, even the feelsbad ones.", 
+                    '","image": "data:image/svg+xml;base64,',
+                    _encode(bytes(_generateSvg(hash))),
+                    '","attributes":',
+                    _hashMetadata(hash, id),
+                    "}"
+                )))
+            )
+        ));
+
+        return uri;
     }
 
-    function totalSupply() public view returns (uint256)
+    function _generateSvg(uint256 hash) public view returns(string memory) 
     {
-        return _totalSupply;
-    }
-
-    function supplyLocked() public view returns (bool)
-    {
-        return _supplyLocked;
-    }
-
-    function mintHashes(uint256[] memory hashes) external onlyOwner returns (bool)
-    {
-        require(_supplyLocked == false);
-
-        address sender = _msgSender();
-
-        uint256 supply = _totalSupply;
-
-        uint256 mintedCount;
-
-        for(uint256 i = 0; i < hashes.length; i++)
-        {
-            require(hashes[i] >= 10 ** _hashLength);
-
-            if(_mintedTokens[hashes[i]] == false)
-            {
-                _mintedTokens[hashes[i]] = true;
-                _tokenHashes[supply] = hashes[i];
-
-                _safeMint(sender, supply + mintedCount);
-                mintedCount++;
-            }
-        }
-
-        _totalSupply += mintedCount;
-
-        return true;
-    }
-
-    function tokenURI(uint256 id) public view override returns (string memory) //BROKEN
-    {
-
-    }
-
-    function _generateSvg() public view returns(string memory) 
-    {
-        uint256 hash = 1000000000000000000000000000000000;
-
         string memory xScale = "1";
 
         if(_splitHash(hash, 10) > 0)
@@ -1148,7 +1296,7 @@ contract Wojek is ERC721, Ownable
         {
             uint256 attributeIndex = _splitHash(hash, i);
 
-            for(uint256 a = 0; a < _attributes[i][attributeIndex].svg.length; a++)
+            for(uint256 a = 0; a < _attributes[i][attributeIndex].rectCount; a++)
             {
                 svg = string(abi.encodePacked(svg, 
                     "<rect class='w", _toString(_splitSVG(_attributes[i][attributeIndex].svg[a], 0)), 
@@ -1164,22 +1312,71 @@ contract Wojek is ERC721, Ownable
         return string(abi.encodePacked(svg, "</svg>"));
     }
 
-    function _hashMetadata(uint256 hash) private view returns(string memory)
+    function _hashMetadata(uint256 hash, uint256 id) private view returns(string memory)
     {
+        string memory metadata;
 
+        for(uint256 i = 0; i < _traitCount; i++) 
+        {
+            uint256 attributeIndex = _splitHash(hash, i);
+
+            metadata = string(abi.encodePacked
+            (
+                metadata,
+                '{"trait_type":"',
+                _attributes[i][attributeIndex].trait,
+                '","value":"',
+                _attributes[i][attributeIndex].value,
+                '"}'
+            ));
+        }
+
+        if(_splitHash(hash, 10) > 0)
+        {
+            //Phunked
+            metadata = string(abi.encodePacked
+            (
+                metadata,
+                '{"trait_type":"',
+                "Phunk",
+                '","value":"',
+                "Phunked",
+                '"}'
+            ));
+        }
+
+        for(uint256 i = 0; i < _seriesIndexes.length; i++) 
+        {
+            if(id < _seriesIndexes[i])
+            {
+                //Series
+                metadata = string(abi.encodePacked
+                (
+                    metadata,
+                    '{"trait_type":"',
+                    "Series",
+                    '","value":"',
+                    _toString(i),
+                    '"}'
+                ));
+            }
+        }
+
+        return string(abi.encodePacked("[", metadata, "]"));
     }
 
     function addToAllAttributes(Attribute[][] memory newAttributes) external onlyOwner returns (bool)
     {
-        for(uint256 a = 0; a < newAttributes.length; a++)
+        for(uint256 i = 0; i < _traitCount; i++)
         {
-            for(uint256 i = 0; i < newAttributes.length; i++)
+            for(uint256 a = 0; a < newAttributes[i].length; a++)
             {
-                _attributes[a].push(Attribute
+                _attributes[i].push(Attribute
                 (
-                    newAttributes[a][i].trait,
-                    newAttributes[a][i].value,
-                    newAttributes[a][i].svg
+                    newAttributes[i][a].trait,
+                    newAttributes[i][a].value,
+                    newAttributes[i][a].rectCount,
+                    newAttributes[i][a].svg
                 ));
             }
         }
@@ -1195,6 +1392,7 @@ contract Wojek is ERC721, Ownable
             (
                 newAttributes[i].trait,
                 newAttributes[i].value,
+                newAttributes[i].rectCount,
                 newAttributes[i].svg
             ));
         }
@@ -1202,9 +1400,26 @@ contract Wojek is ERC721, Ownable
         return true;
     }
 
+    function totalSupply() public view returns (uint256)
+    {
+        return _totalSupply;
+    }
+
+    function supplyLocked() public view returns (bool)
+    {
+        return _supplyLocked;
+    }
+
+    function lockSupply() external onlyOwner returns (bool)
+    {
+        _supplyLocked = true;
+
+        return true;
+    }
+
     function _dirtyRandom(uint256 seed) private view returns (uint256)
     {
-        return uint256(keccak256(abi.encodePacked(type(uint256).max, block.difficulty, block.timestamp, seed)));
+        return uint256(keccak256(abi.encodePacked(type(uint256).max, block.difficulty, block.timestamp, _msgSender(), seed)));
     }
 
     function _splitSVG(uint32 svg, uint32 index) public pure returns (uint256)
