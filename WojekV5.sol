@@ -917,23 +917,75 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     }
 }
 
+// Wojek library
 library WojekHelper
 {
     string internal constant TABLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    function attributeIndexToString(uint256 index) internal pure returns (string memory result)
+    {
+        if(index == 0)
+        {
+            result = "Background";
+        }
+        else if(index == 1)
+        {
+            result = "Character";
+        }
+        else if(index == 2)
+        {
+            result = "Beard";
+        }
+        else if(index == 3)
+        {
+            result = "Forehead";
+        }
+        else if(index == 4)
+        {
+            result = "Mouth";
+        }
+        else if(index == 5)
+        {
+            result = "Eyes";
+        }
+        else if(index == 6)
+        {
+            result = "Nose";
+        }
+        else if(index == 7)
+        {
+            result = "Hat";
+        }
+        else if(index == 8)
+        {
+            result = "Accessory";
+        }
+
+        return result;
+    }
 
     function dirtyRandom(uint256 seed, address sender) internal view returns (uint256)
     {
         return uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp, sender, seed)));
     }
 
-    function splitSVG(uint32 svg, uint32 index) internal pure returns (uint256)
+    function subString(string memory str, uint startIndex, uint endIndex) internal pure returns (bytes memory) 
     {
-        return (svg / (10 ** (10 - (index * 2) - 2))) % 100;
+        bytes memory strBytes = bytes(str);
+        bytes memory result = new bytes(endIndex-startIndex);
+        for(uint i = startIndex; i < endIndex; i++) {
+            result[i-startIndex] = strBytes[i];
+        }
+        return result;
     }
 
     function splitHash(uint256 hash, uint256 hashLength, uint256 attributeIndex) internal pure returns (uint256)
     {
         return ((hash - 10 ** hashLength) / (10 ** (hashLength - (attributeIndex * 3) - 3))) % 1000;
+    }
+
+    function stringLength(string memory str) internal pure returns(uint256) {
+        return bytes(str).length;
     }
 
     function toString(uint256 value) internal pure returns (string memory) 
@@ -1031,19 +1083,18 @@ library WojekHelper
     }
 }
 
+// Wojek NFT
 contract Wojek is ERC721, Ownable
 {
     struct Attribute 
     {
-        string trait;
         string value;
-        uint32 rectCount;
-        uint32[] svg;
+        string svg;
     }
 
     string private constant _svgHeader = "<svg id='wojek-svg' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 50 50' transform='scale(";
-    string private constant _svgStyles = "<style>#wojek-svg{shape-rendering: crispedges;}.w10{fill:#000000}.w11{fill:#ffffff}.w12{fill:#00aaff}.w13{fill:#ff0000}.w14{fill:#ff7777}.w15{fill:#ff89b9}.w16{fill:#fff9e5}.w17{fill:#fff9d5}.w18{fill:#93c63b}.w19{fill:#ff6a00}.w20{fill:#808080}.w21{fill:#a94d00}.w22{fill:#00ffff}.w23{fill:#00ff00}.w24{fill:#B2B2B2}.w25{fill:#267F00}.w26{fill:#5B7F00}.w27{fill:#7F3300}.w28{fill:#A3A3A3}";
-
+    string private constant _svgStyles = "<style>#wojek-svg{shape-rendering: crispedges;}.w10{fill:#000000}.w11{fill:#ffffff}.w12{fill:#00aaff}.w13{fill:#ff0000}.w14{fill:#ff7777}.w15{fill:#ff89b9}.w16{fill:#fff9e5}.w17{fill:#fff9d5}.w18{fill:#93c63b}.w19{fill:#ff6a00}.w20{fill:#808080}.w21{fill:#a94d00}.w22{fill:#00ffff}.w23{fill:#00ff00}.w24{fill:#B2B2B2}.w25{fill:#267F00}.w26{fill:#A3A3A3}";
+        
     string private _background = "<rect class='w50' x='00' y='00' width='50' height='50'/>";
     string private _wojakFill = "<rect class='w51' x='15' y='05' width='19' height='45'/><rect class='w51' x='17' y='03' width='18' height='02'/><rect class='w51' x='34' y='05' width='04' height='37'/><rect class='w51' x='38' y='07' width='02' height='33'/><rect class='w51' x='40' y='09' width='02' height='29'/><rect class='w51' x='42' y='14' width='02' height='20'/><rect class='w51' x='44' y='25' width='01' height='05'/><rect class='w51' x='13' y='07' width='02' height='24'/><rect class='w51' x='11' y='11' width='02' height='15'/><rect class='w51' x='34' y='46' width='12' height='04'/><rect class='w51' x='46' y='49' width='03' height='01'/><rect class='w51' x='34' y='45' width='01' height='01'/><rect class='w51' x='46' y='48' width='01' height='01'/><rect class='w51' x='00' y='47' width='15' height='03'/><rect class='w51' x='05' y='45' width='10' height='02'/><rect class='w51' x='11' y='43' width='04' height='02'/><rect class='w51' x='13' y='39' width='02' height='04'/>";
     string private _wojakOutline = "<rect class='w10' x='00' y='47' width='01' height='01'/><rect class='w10' x='01' y='46' width='04' height='01'/><rect class='w10' x='05' y='45' width='03' height='01'/><rect class='w10' x='08' y='44' width='03' height='01'/><rect class='w10' x='11' y='43' width='01' height='01'/><rect class='w10' x='12' y='42' width='01' height='01'/><rect class='w10' x='13' y='39' width='01' height='03'/><rect class='w10' x='14' y='37' width='01' height='02'/><rect class='w10' x='15' y='32' width='01' height='05'/><rect class='w10' x='14' y='31' width='01' height='01'/><rect class='w10' x='13' y='29' width='01' height='02'/><rect class='w10' x='12' y='26' width='01' height='03'/><rect class='w10' x='11' y='24' width='01' height='02'/><rect class='w10' x='10' y='14' width='01' height='10'/><rect class='w10' x='11' y='11' width='01' height='03'/><rect class='w10' x='12' y='08' width='01' height='03'/><rect class='w10' x='13' y='07' width='01' height='01'/><rect class='w10' x='14' y='06' width='01' height='01'/><rect class='w10' x='15' y='05' width='01' height='01'/><rect class='w10' x='16' y='04' width='01' height='01'/><rect class='w10' x='17' y='03' width='03' height='01'/><rect class='w10' x='20' y='02' width='11' height='01'/><rect class='w10' x='31' y='03' width='04' height='01'/><rect class='w10' x='35' y='04' width='02' height='01'/><rect class='w10' x='37' y='05' width='01' height='01'/><rect class='w10' x='38' y='06' width='01' height='01'/><rect class='w10' x='39' y='07' width='01' height='01'/><rect class='w10' x='40' y='08' width='01' height='01'/><rect class='w10' x='41' y='09' width='01' height='02'/><rect class='w10' x='42' y='11' width='01' height='03'/><rect class='w10' x='43' y='14' width='01' height='03'/><rect class='w10' x='44' y='17' width='01' height='08'/><rect class='w10' x='45' y='25' width='01' height='05'/><rect class='w10' x='44' y='30' width='01' height='02'/><rect class='w10' x='43' y='32' width='01' height='02'/><rect class='w10' x='42' y='34' width='01' height='01'/><rect class='w10' x='41' y='35' width='01' height='03'/><rect class='w10' x='40' y='38' width='01' height='01'/><rect class='w10' x='39' y='39' width='01' height='01'/><rect class='w10' x='38' y='40' width='01' height='01'/><rect class='w10' x='36' y='41' width='02' height='01'/><rect class='w10' x='30' y='42' width='06' height='01'/><rect class='w10' x='28' y='41' width='02' height='01'/><rect class='w10' x='27' y='40' width='01' height='01'/><rect class='w10' x='25' y='39' width='02' height='01'/><rect class='w10' x='24' y='38' width='01' height='01'/><rect class='w10' x='23' y='37' width='01' height='01'/><rect class='w10' x='22' y='36' width='01' height='01'/><rect class='w10' x='21' y='35' width='01' height='01'/><rect class='w10' x='20' y='34' width='01' height='01'/><rect class='w10' x='19' y='31' width='01' height='03'/><rect class='w10' x='18' y='28' width='01' height='03'/><rect class='w10' x='33' y='43' width='01' height='01'/><rect class='w10' x='34' y='44' width='01' height='01'/><rect class='w10' x='35' y='45' width='08' height='01'/><rect class='w10' x='43' y='46' width='03' height='01'/><rect class='w10' x='46' y='47' width='01' height='01'/><rect class='w10' x='47' y='48' width='02' height='01'/><rect class='w10' x='49' y='49' width='01' height='01'/><rect class='w10' x='18' y='36' width='01' height='01'/><rect class='w10' x='19' y='37' width='01' height='02'/><rect class='w10' x='14' y='45' width='02' height='01'/><rect class='w10' x='16' y='44' width='01' height='01'/><rect class='w10' x='17' y='43' width='02' height='01'/><rect class='w10' x='23' y='47' width='02' height='01'/><rect class='w10' x='25' y='48' width='04' height='01'/><rect class='w10' x='29' y='47' width='02' height='01'/>";
@@ -1065,20 +1116,6 @@ contract Wojek is ERC721, Ownable
 
     uint256 private _currentSeries;
     uint256[] _seriesRanges;
-
-    /* Hashing standard (hash reads left to right)
-
-        Background  0
-        Character   1
-        Beard       2
-        Forehead    3
-        Mouth       4   
-        Eyes        5
-        Nose        6
-        Hat         7
-        Accessory   8
-        Phunk       9
-    */
 
     constructor() ERC721("Wojek", "WOJEK")
     {
@@ -1149,6 +1186,7 @@ contract Wojek is ERC721, Ownable
     function endMint() public onlyOwner returns (bool)
     {
         require(_mintsLeft > 0);
+        
         _mintsLeft = 0;
 
         return true;
@@ -1225,9 +1263,7 @@ contract Wojek is ERC721, Ownable
         {
             _attributes[attributeType].push(Attribute
             (
-                newAttributes[i].trait,
                 newAttributes[i].value,
-                newAttributes[i].rectCount,
                 newAttributes[i].svg
             ));
         }
@@ -1278,8 +1314,8 @@ contract Wojek is ERC721, Ownable
 
         bytes memory svg = abi.encodePacked(
             _svgHeader, xScale, ",1)'>", _svgStyles, 
-            _attributes[0][WojekHelper.splitHash(hash, _hashLength, 0)].trait, 
-            _attributes[1][WojekHelper.splitHash(hash, _hashLength, 1)].trait, 
+            _attributes[0][WojekHelper.splitHash(hash, _hashLength, 0)].svg, 
+            _attributes[1][WojekHelper.splitHash(hash, _hashLength, 1)].svg, 
             "</style>"
         );
 
@@ -1296,14 +1332,18 @@ contract Wojek is ERC721, Ownable
         {
             uint256 attributeIndex = WojekHelper.splitHash(hash, _hashLength, i);
 
-            for(uint256 a = 0; a < _attributes[i][attributeIndex].rectCount; a++)
+            uint256 svgLength = WojekHelper.stringLength(_attributes[i][attributeIndex].svg) / 10;
+
+            for(uint256 a = 0; a < svgLength; a++)
             {
+                uint256 svgIndex = a * 10;
+
                 svg = abi.encodePacked(svg, 
-                    "<rect class='w", WojekHelper.toString(WojekHelper.splitSVG(_attributes[i][attributeIndex].svg[a], 0)), 
-                    "' x='", WojekHelper.toString(WojekHelper.splitSVG(_attributes[i][attributeIndex].svg[a], 1)), 
-                    "' y='", WojekHelper.toString(WojekHelper.splitSVG(_attributes[i][attributeIndex].svg[a], 2)), 
-                    "' width='", WojekHelper.toString(WojekHelper.splitSVG(_attributes[i][attributeIndex].svg[a], 3)), 
-                    "' height='", WojekHelper.toString(WojekHelper.splitSVG(_attributes[i][attributeIndex].svg[a], 4)), 
+                    "<rect class='w", WojekHelper.subString(_attributes[i][attributeIndex].svg, svgIndex, svgIndex + 2), 
+                    "' x='", WojekHelper.subString(_attributes[i][attributeIndex].svg, svgIndex + 2, svgIndex + 4), 
+                    "' y='", WojekHelper.subString(_attributes[i][attributeIndex].svg, svgIndex + 4, svgIndex + 6), 
+                    "' width='", WojekHelper.subString(_attributes[i][attributeIndex].svg, svgIndex + 6, svgIndex + 8), 
+                    "' height='", WojekHelper.subString(_attributes[i][attributeIndex].svg, svgIndex + 8, svgIndex + 10), 
                     "'/>"
                 );
             }
@@ -1320,13 +1360,13 @@ contract Wojek is ERC721, Ownable
         {
             uint256 attributeIndex = WojekHelper.splitHash(hash, _hashLength, i);
 
-            if(_attributes[i][attributeIndex].rectCount > 0)
+            if(WojekHelper.stringLength(_attributes[i][attributeIndex].svg) > 0)
             {
                 metadata = string(abi.encodePacked
                 (
                     metadata,
                     '{"trait_type":"',
-                    _attributes[i][attributeIndex].trait,
+                    WojekHelper.attributeIndexToString(i),
                     '","value":"',
                     _attributes[i][attributeIndex].value,
                     '"}'
