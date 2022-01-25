@@ -701,7 +701,7 @@ contract Wojek is ERC721, Ownable
     }
 
     string private constant _svgHeader = "<svg id='wojek-svg' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 50 50' transform='scale(";
-    string private constant _svgStyles = "<style>#wojek-svg{shape-rendering: crispedges;}.w10{fill:#000000}.w11{fill:#ffffff}.w12{fill:#00aaff}.w13{fill:#ff0000}.w14{fill:#ff7777}.w15{fill:#ff89b9}.w16{fill:#fff9e5}.w17{fill:#fff9d5}.w18{fill:#93c63b}.w19{fill:#ff6a00}.w20{fill:#808080}.w21{fill:#a94d00}.w22{fill:#00ffff}.w23{fill:#00ff00}.w24{fill:#B2B2B2}.w25{fill:#267F00}.w26{fill:#5B7F00}.w27{fill:#7F3300}.w28{fill:#A3A3A3}.w29{fill:#B78049}.w30{fill:#B5872B}.w31{fill:#565756}.w32{fill:#282828}.w33{fill:#8F7941}";
+    string private constant _svgStyles = "<style>#wojek-svg{shape-rendering: crispedges;}.w10{fill:#000000}.w11{fill:#ffffff}.w12{fill:#00aaff}.w13{fill:#ff0000}.w14{fill:#ff7777}.w15{fill:#ff89b9}.w16{fill:#fff9e5}.w17{fill:#fff9d5}.w18{fill:#93c63b}.w19{fill:#ff6a00}.w20{fill:#808080}.w21{fill:#a94d00}.w22{fill:#00ffff}.w23{fill:#00ff00}.w24{fill:#B2B2B2}.w25{fill:#267F00}.w26{fill:#5B7F00}.w27{fill:#7F3300}.w28{fill:#A3A3A3}.w29{fill:#B78049}.w30{fill:#B5872B}.w31{fill:#565756}.w32{fill:#282828}.w33{fill:#8F7941}.w34{fill:#E3E5E4}.w35{fill:#6BBDD3}.w36{fill:#FFFF00}.w37{fill:#6A6257}";
         
     string private _background = "<rect class='w00' x='00' y='00' width='50' height='50'/>";
     string private _wojakFill = "<rect class='w01' x='15' y='05' width='19' height='45'/><rect class='w01' x='17' y='03' width='18' height='02'/><rect class='w01' x='34' y='05' width='04' height='37'/><rect class='w01' x='38' y='07' width='02' height='33'/><rect class='w01' x='40' y='09' width='02' height='29'/><rect class='w01' x='42' y='14' width='02' height='20'/><rect class='w01' x='44' y='25' width='01' height='05'/><rect class='w01' x='13' y='07' width='02' height='24'/><rect class='w01' x='11' y='11' width='02' height='15'/><rect class='w01' x='34' y='46' width='12' height='04'/><rect class='w01' x='46' y='49' width='03' height='01'/><rect class='w01' x='34' y='45' width='01' height='01'/><rect class='w01' x='46' y='48' width='01' height='01'/><rect class='w01' x='00' y='47' width='15' height='03'/><rect class='w01' x='05' y='45' width='10' height='02'/><rect class='w01' x='11' y='43' width='04' height='02'/><rect class='w01' x='13' y='39' width='02' height='04'/>";
@@ -753,13 +753,6 @@ contract Wojek is ERC721, Ownable
         return _maxSupply;
     }
 
-    function finishSeries() public onlyOwner returns (bool)
-    {
-        _seriesRanges.push(_totalSupply);
-
-        return true;
-    }
-
     function mintsLeft() public view returns (uint256)
     {
         return _mintsLeft;
@@ -768,6 +761,13 @@ contract Wojek is ERC721, Ownable
     function mintCost() public view returns (uint256)
     {
         return _mintCost;
+    }
+
+    function finishSeries() public onlyOwner returns (bool)
+    {
+        _seriesRanges.push(_totalSupply);
+
+        return true;
     }
 
     function startMint(uint256 amount, uint256 cost) public onlyOwner returns (bool)
