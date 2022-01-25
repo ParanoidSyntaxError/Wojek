@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.0;
 
 library Address 
 {
@@ -791,63 +791,67 @@ contract Wojek is ERC721, Ownable
 
     function mint() public payable returns (bool)
     {
-        require(_totalSupply < _maxSupply);
-        require(_mintsLeft > 0);
-        require(msg.value >= _mintCost);
+        uint256 value = msg.value;
+        require(value >= _mintCost);
 
-        uint256 supply = _totalSupply;
+        uint256 mintAmount = value / _mintCost;
+        require(_totalSupply + mintAmount <= _maxSupply);
+        require(_mintsLeft - mintAmount >= 0);
 
         address sender = _msgSender();
 
-        uint256 randomNumber = WojekHelper.dirtyRandom(supply, sender);
-
-        uint256 hash = 10 ** _hashLength;
-
-        for(uint256 i = 0; i < _traitCount; i++)
+        for(uint256 i = 0; i < mintAmount; i++)
         {
-            hash += (10 ** (_hashLength - (i * 3) - 3)) * (randomNumber % _attributes[i].length);
+            uint256 id = _totalSupply + i;
 
-            randomNumber >>= 8;
+            uint256 randomNumber = WojekHelper.dirtyRandom(id, sender);
+
+            uint256 hash = 10 ** _hashLength;
+
+            for(uint256 a = 0; a < _traitCount; a++)
+            {
+                hash += (10 ** (_hashLength - (a * 3) - 3)) * (randomNumber % _attributes[a].length);
+
+                randomNumber >>= 8;
+            }
+
+            if(randomNumber % 100 < 10)
+            {
+                hash += 1; 
+            }
+
+            require(_mintedTokens[hash] == false);
+
+            _mintedTokens[hash] = true;
+            _tokenHashes[id] = hash;
+
+            _safeMint(sender, id);
         }
 
-        if(randomNumber % 100 < 10)
-        {
-            hash += 1; 
-        }
-
-        require(_mintedTokens[hash] == false);
-
-        _mintedTokens[hash] = true;
-        _tokenHashes[supply] = hash;
-
-        _safeMint(sender, supply);
-
-        _mintsLeft--;
-        _totalSupply++;
+        _mintsLeft -= mintAmount;
+        _totalSupply += mintAmount;
 
         return true;
     }
 
     function mintHashes(uint256[] memory hashes) public onlyOwner returns (bool)
     {
-        require(_totalSupply < _maxSupply);
+        uint256 mintAmount = hashes.length;
+        require(_totalSupply + mintAmount <= _maxSupply);
 
         address sender = _msgSender();
 
-        uint256 supply = _totalSupply;
-
-        uint256 mintedCount;
-
         for(uint256 i = 0; i < hashes.length; i++)
         {
-            _mintedTokens[hashes[i]] = true;
-            _tokenHashes[supply + mintedCount] = hashes[i];
+            uint256 id = _totalSupply + i;
 
-            _safeMint(sender, supply + mintedCount);
-            mintedCount++;
+            _mintedTokens[hashes[i]] = true;
+            _tokenHashes[id] = hashes[i];
+
+            _safeMint(sender, id);
         }
 
-        _totalSupply += mintedCount;
+        _totalSupply += mintAmount;
 
         return true;
     }

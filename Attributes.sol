@@ -33,6 +33,15 @@
     w37{fill:#6A6257} //Coom helmet
 */
 
+/* Hashes
+
+    Wojak
+    1000000000000000000000000000000
+
+    Phunked Wojak
+    1000000000000000000000000000001
+*/
+
 /* Attributes V5
 
     0 - Backgrounds
