@@ -91,6 +91,24 @@ library WojekHelper
         return string(buffer);
     }
 
+    function uint8tohexchar(uint8 i) internal pure returns (uint8) {
+        return (i > 9) ?
+            (i + 87) : // ascii a-f
+            (i + 48); // ascii 0-9
+    }
+
+    function uint24ToHexStr(uint24 i) internal pure returns (string memory) {
+        bytes memory o = new bytes(6);
+        uint24 mask = 0x00000f; // hex 15
+        uint k = 6;
+        do {
+            k--;
+            o[k] = bytes1(uint8tohexchar(uint8(i & mask)));
+            i >>= 4;
+        } while (k > 0);
+        return string(o);
+    }
+
     function encode(bytes memory data) internal pure returns (string memory) 
     {
         if (data.length == 0) return "";

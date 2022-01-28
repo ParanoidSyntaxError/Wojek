@@ -10,15 +10,10 @@ contract Wojek is ERC721, Ownable
     struct Attribute 
     {
         string value;
-        string svg;
+        uint40[] svg;
     }
 
-    string private constant _svgHeader = "<svg id='wojek-svg' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 50 50' transform='scale(";
-    string private constant _svgStyles = "<style>#wojek-svg{shape-rendering: crispedges;}.w10{fill:#000000}.w11{fill:#ffffff}.w12{fill:#00aaff}.w13{fill:#ff0000}.w14{fill:#ff7777}.w15{fill:#ff89b9}.w16{fill:#fff9e5}.w17{fill:#fff9d5}.w18{fill:#93c63b}.w19{fill:#ff6a00}.w20{fill:#808080}.w21{fill:#a94d00}.w22{fill:#00ffff}.w23{fill:#00ff00}.w24{fill:#B2B2B2}.w25{fill:#267F00}.w26{fill:#5B7F00}.w27{fill:#7F3300}.w28{fill:#A3A3A3}.w29{fill:#B78049}.w30{fill:#B5872B}.w31{fill:#565756}.w32{fill:#282828}.w33{fill:#8F7941}.w34{fill:#E3E5E4}.w35{fill:#6BBDD3}.w36{fill:#FFFF00}.w37{fill:#6A6257}";
-        
-    string private _background = "<rect class='w00' x='00' y='00' width='50' height='50'/>";
-    string private _wojakFill = "<rect class='w01' x='15' y='05' width='19' height='45'/><rect class='w01' x='17' y='03' width='18' height='02'/><rect class='w01' x='34' y='05' width='04' height='37'/><rect class='w01' x='38' y='07' width='02' height='33'/><rect class='w01' x='40' y='09' width='02' height='29'/><rect class='w01' x='42' y='14' width='02' height='20'/><rect class='w01' x='44' y='25' width='01' height='05'/><rect class='w01' x='13' y='07' width='02' height='24'/><rect class='w01' x='11' y='11' width='02' height='15'/><rect class='w01' x='34' y='46' width='12' height='04'/><rect class='w01' x='46' y='49' width='03' height='01'/><rect class='w01' x='34' y='45' width='01' height='01'/><rect class='w01' x='46' y='48' width='01' height='01'/><rect class='w01' x='00' y='47' width='15' height='03'/><rect class='w01' x='05' y='45' width='10' height='02'/><rect class='w01' x='11' y='43' width='04' height='02'/><rect class='w01' x='13' y='39' width='02' height='04'/>";
-    string private _wojakOutline = "<rect class='w10' x='00' y='47' width='01' height='01'/><rect class='w10' x='01' y='46' width='04' height='01'/><rect class='w10' x='05' y='45' width='03' height='01'/><rect class='w10' x='08' y='44' width='03' height='01'/><rect class='w10' x='11' y='43' width='01' height='01'/><rect class='w10' x='12' y='42' width='01' height='01'/><rect class='w10' x='13' y='39' width='01' height='03'/><rect class='w10' x='14' y='37' width='01' height='02'/><rect class='w10' x='15' y='32' width='01' height='05'/><rect class='w10' x='14' y='31' width='01' height='01'/><rect class='w10' x='13' y='29' width='01' height='02'/><rect class='w10' x='12' y='26' width='01' height='03'/><rect class='w10' x='11' y='24' width='01' height='02'/><rect class='w10' x='10' y='14' width='01' height='10'/><rect class='w10' x='11' y='11' width='01' height='03'/><rect class='w10' x='12' y='08' width='01' height='03'/><rect class='w10' x='13' y='07' width='01' height='01'/><rect class='w10' x='14' y='06' width='01' height='01'/><rect class='w10' x='15' y='05' width='01' height='01'/><rect class='w10' x='16' y='04' width='01' height='01'/><rect class='w10' x='17' y='03' width='03' height='01'/><rect class='w10' x='20' y='02' width='11' height='01'/><rect class='w10' x='31' y='03' width='04' height='01'/><rect class='w10' x='35' y='04' width='02' height='01'/><rect class='w10' x='37' y='05' width='01' height='01'/><rect class='w10' x='38' y='06' width='01' height='01'/><rect class='w10' x='39' y='07' width='01' height='01'/><rect class='w10' x='40' y='08' width='01' height='01'/><rect class='w10' x='41' y='09' width='01' height='02'/><rect class='w10' x='42' y='11' width='01' height='03'/><rect class='w10' x='43' y='14' width='01' height='03'/><rect class='w10' x='44' y='17' width='01' height='08'/><rect class='w10' x='45' y='25' width='01' height='05'/><rect class='w10' x='44' y='30' width='01' height='02'/><rect class='w10' x='43' y='32' width='01' height='02'/><rect class='w10' x='42' y='34' width='01' height='01'/><rect class='w10' x='41' y='35' width='01' height='03'/><rect class='w10' x='40' y='38' width='01' height='01'/><rect class='w10' x='39' y='39' width='01' height='01'/><rect class='w10' x='38' y='40' width='01' height='01'/><rect class='w10' x='36' y='41' width='02' height='01'/><rect class='w10' x='30' y='42' width='06' height='01'/><rect class='w10' x='28' y='41' width='02' height='01'/><rect class='w10' x='27' y='40' width='01' height='01'/><rect class='w10' x='25' y='39' width='02' height='01'/><rect class='w10' x='24' y='38' width='01' height='01'/><rect class='w10' x='23' y='37' width='01' height='01'/><rect class='w10' x='22' y='36' width='01' height='01'/><rect class='w10' x='21' y='35' width='01' height='01'/><rect class='w10' x='20' y='34' width='01' height='01'/><rect class='w10' x='19' y='31' width='01' height='03'/><rect class='w10' x='18' y='28' width='01' height='03'/><rect class='w10' x='33' y='43' width='01' height='01'/><rect class='w10' x='34' y='44' width='01' height='01'/><rect class='w10' x='35' y='45' width='08' height='01'/><rect class='w10' x='43' y='46' width='03' height='01'/><rect class='w10' x='46' y='47' width='01' height='01'/><rect class='w10' x='47' y='48' width='02' height='01'/><rect class='w10' x='49' y='49' width='01' height='01'/><rect class='w10' x='18' y='36' width='01' height='01'/><rect class='w10' x='19' y='37' width='01' height='02'/><rect class='w10' x='14' y='45' width='02' height='01'/><rect class='w10' x='16' y='44' width='01' height='01'/><rect class='w10' x='17' y='43' width='02' height='01'/><rect class='w10' x='23' y='47' width='02' height='01'/><rect class='w10' x='25' y='48' width='04' height='01'/><rect class='w10' x='29' y='47' width='02' height='01'/>";
+    string private _additionalColors;
 
     uint256 private constant _traitCount = 9;
 
@@ -76,6 +71,13 @@ contract Wojek is ERC721, Ownable
         return _mintCost;
     }
 
+    function addColors(string memory colors) public onlyOwner returns (bool)
+    {
+        _additionalColors = string(abi.encodePacked(_additionalColors, colors));
+
+        return true;
+    }
+
     function finishSeries() public onlyOwner returns (bool)
     {
         _seriesRanges.push(_totalSupply);
@@ -112,6 +114,9 @@ contract Wojek is ERC721, Ownable
 
         address sender = _msgSender();
 
+        uint256[] memory safeHashes = new uint256[](mintAmount);
+
+        //Memory
         for(uint256 i = 0; i < mintAmount; i++)
         {
             uint256 id = _totalSupply + i;
@@ -134,8 +139,16 @@ contract Wojek is ERC721, Ownable
 
             require(_mintedTokens[hash] == false);
 
-            _mintedTokens[hash] = true;
-            _tokenHashes[id] = hash;
+            safeHashes[i] = hash;
+        }
+
+        //Storage
+        for(uint256 i = 0; i < mintAmount; i++)
+        {
+            uint256 id = _totalSupply + i;
+
+            _mintedTokens[safeHashes[i]] = true;
+            _tokenHashes[id] = safeHashes[i];
 
             _safeMint(sender, id);
         }
@@ -197,32 +210,39 @@ contract Wojek is ERC721, Ownable
         }
 
         result = string(abi.encodePacked(
-            _svgHeader, xScale, ",1)'>", _svgStyles, 
-            _attributes[0][WojekHelper.splitHash(hash, _hashLength, 0)].svg, 
-            _attributes[1][WojekHelper.splitHash(hash, _hashLength, 1)].svg, 
-            "</style>",
-            _background,
-            _wojakFill,
-            _wojakOutline
+            "<svg id='wojek-svg' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='xMinYMin meet' viewBox='0 0 50 50' transform='scale(", 
+            xScale, 
+            ",1)'><style>#wojek-svg{shape-rendering: crispedges;}.w10{fill:#000000}.w11{fill:#ffffff}.w12{fill:#00aaff}.w13{fill:#ff0000}.w14{fill:#ff7777}.w15{fill:#ff89b9}.w16{fill:#fff9e5}.w17{fill:#fff9d5}.w18{fill:#93c63b}.w19{fill:#ff6a00}.w20{fill:#808080}.w21{fill:#a94d00}.w22{fill:#00ffff}.w23{fill:#00ff00}.w24{fill:#B2B2B2}.w25{fill:#267F00}.w26{fill:#5B7F00}.w27{fill:#7F3300}.w28{fill:#A3A3A3}.w29{fill:#B78049}.w30{fill:#B5872B}.w31{fill:#565756}.w32{fill:#282828}.w33{fill:#8F7941}.w34{fill:#E3E5E4}.w35{fill:#6BBDD3}.w36{fill:#FFFF00}.w37{fill:#6A6257}", 
+            _additionalColors,
+            ".w00{fill:#", 
+            WojekHelper.uint24ToHexStr(uint24(_attributes[0][WojekHelper.splitHash(hash, _hashLength, 0)].svg[0])), 
+            "}.w01{fill:#", 
+            WojekHelper.uint24ToHexStr(uint24(_attributes[1][WojekHelper.splitHash(hash, _hashLength, 1)].svg[0])), 
+            "}</style>"
+        ));
+
+        result = string(abi.encodePacked(
+            result,
+            "<rect class='w00' x='00' y='00' width='50' height='50'/>",
+            "<rect class='w01' x='15' y='05' width='19' height='45'/><rect class='w01' x='17' y='03' width='18' height='02'/><rect class='w01' x='34' y='05' width='04' height='37'/><rect class='w01' x='38' y='07' width='02' height='33'/><rect class='w01' x='40' y='09' width='02' height='29'/><rect class='w01' x='42' y='14' width='02' height='20'/><rect class='w01' x='44' y='25' width='01' height='05'/><rect class='w01' x='13' y='07' width='02' height='24'/><rect class='w01' x='11' y='11' width='02' height='15'/><rect class='w01' x='34' y='46' width='12' height='04'/><rect class='w01' x='46' y='49' width='03' height='01'/><rect class='w01' x='34' y='45' width='01' height='01'/><rect class='w01' x='46' y='48' width='01' height='01'/><rect class='w01' x='00' y='47' width='15' height='03'/><rect class='w01' x='05' y='45' width='10' height='02'/><rect class='w01' x='11' y='43' width='04' height='02'/><rect class='w01' x='13' y='39' width='02' height='04'/>",
+            "<rect class='w10' x='00' y='47' width='01' height='01'/><rect class='w10' x='01' y='46' width='04' height='01'/><rect class='w10' x='05' y='45' width='03' height='01'/><rect class='w10' x='08' y='44' width='03' height='01'/><rect class='w10' x='11' y='43' width='01' height='01'/><rect class='w10' x='12' y='42' width='01' height='01'/><rect class='w10' x='13' y='39' width='01' height='03'/><rect class='w10' x='14' y='37' width='01' height='02'/><rect class='w10' x='15' y='32' width='01' height='05'/><rect class='w10' x='14' y='31' width='01' height='01'/><rect class='w10' x='13' y='29' width='01' height='02'/><rect class='w10' x='12' y='26' width='01' height='03'/><rect class='w10' x='11' y='24' width='01' height='02'/><rect class='w10' x='10' y='14' width='01' height='10'/><rect class='w10' x='11' y='11' width='01' height='03'/><rect class='w10' x='12' y='08' width='01' height='03'/><rect class='w10' x='13' y='07' width='01' height='01'/><rect class='w10' x='14' y='06' width='01' height='01'/><rect class='w10' x='15' y='05' width='01' height='01'/><rect class='w10' x='16' y='04' width='01' height='01'/><rect class='w10' x='17' y='03' width='03' height='01'/><rect class='w10' x='20' y='02' width='11' height='01'/><rect class='w10' x='31' y='03' width='04' height='01'/><rect class='w10' x='35' y='04' width='02' height='01'/><rect class='w10' x='37' y='05' width='01' height='01'/><rect class='w10' x='38' y='06' width='01' height='01'/><rect class='w10' x='39' y='07' width='01' height='01'/><rect class='w10' x='40' y='08' width='01' height='01'/><rect class='w10' x='41' y='09' width='01' height='02'/><rect class='w10' x='42' y='11' width='01' height='03'/><rect class='w10' x='43' y='14' width='01' height='03'/><rect class='w10' x='44' y='17' width='01' height='08'/><rect class='w10' x='45' y='25' width='01' height='05'/><rect class='w10' x='44' y='30' width='01' height='02'/><rect class='w10' x='43' y='32' width='01' height='02'/><rect class='w10' x='42' y='34' width='01' height='01'/><rect class='w10' x='41' y='35' width='01' height='03'/><rect class='w10' x='40' y='38' width='01' height='01'/><rect class='w10' x='39' y='39' width='01' height='01'/><rect class='w10' x='38' y='40' width='01' height='01'/><rect class='w10' x='36' y='41' width='02' height='01'/><rect class='w10' x='30' y='42' width='06' height='01'/><rect class='w10' x='28' y='41' width='02' height='01'/><rect class='w10' x='27' y='40' width='01' height='01'/><rect class='w10' x='25' y='39' width='02' height='01'/><rect class='w10' x='24' y='38' width='01' height='01'/><rect class='w10' x='23' y='37' width='01' height='01'/><rect class='w10' x='22' y='36' width='01' height='01'/><rect class='w10' x='21' y='35' width='01' height='01'/><rect class='w10' x='20' y='34' width='01' height='01'/><rect class='w10' x='19' y='31' width='01' height='03'/><rect class='w10' x='18' y='28' width='01' height='03'/><rect class='w10' x='33' y='43' width='01' height='01'/><rect class='w10' x='34' y='44' width='01' height='01'/><rect class='w10' x='35' y='45' width='08' height='01'/><rect class='w10' x='43' y='46' width='03' height='01'/><rect class='w10' x='46' y='47' width='01' height='01'/><rect class='w10' x='47' y='48' width='02' height='01'/><rect class='w10' x='49' y='49' width='01' height='01'/><rect class='w10' x='18' y='36' width='01' height='01'/><rect class='w10' x='19' y='37' width='01' height='02'/><rect class='w10' x='14' y='45' width='02' height='01'/><rect class='w10' x='16' y='44' width='01' height='01'/><rect class='w10' x='17' y='43' width='02' height='01'/><rect class='w10' x='23' y='47' width='02' height='01'/><rect class='w10' x='25' y='48' width='04' height='01'/><rect class='w10' x='29' y='47' width='02' height='01'/>"
         ));
 
         for(uint256 i = 2; i < _traitCount; i++) 
         {
             uint256 attributeIndex = WojekHelper.splitHash(hash, _hashLength, i);
 
-            uint256 svgLength = WojekHelper.stringLength(_attributes[i][attributeIndex].svg) / 10;
-
-            for(uint256 a = 0; a < svgLength; a++)
+            for(uint256 a = 0; a < _attributes[i][attributeIndex].svg.length; a++)
             {
-                uint256 svgIndex = a * 10;
+                string memory svgRect = WojekHelper.toString(_attributes[i][attributeIndex].svg[a]);
 
                 result = string(abi.encodePacked(
                     result, 
-                    "<rect class='w", WojekHelper.subString(_attributes[i][attributeIndex].svg, svgIndex, svgIndex + 2), 
-                    "' x='", WojekHelper.subString(_attributes[i][attributeIndex].svg, svgIndex + 2, svgIndex + 4), 
-                    "' y='", WojekHelper.subString(_attributes[i][attributeIndex].svg, svgIndex + 4, svgIndex + 6), 
-                    "' width='", WojekHelper.subString(_attributes[i][attributeIndex].svg, svgIndex + 6, svgIndex + 8), 
-                    "' height='", WojekHelper.subString(_attributes[i][attributeIndex].svg, svgIndex + 8, svgIndex + 10), 
+                    "<rect class='w", WojekHelper.subString(svgRect, 1, 3), 
+                    "' x='", WojekHelper.subString(svgRect, 3, 5), 
+                    "' y='", WojekHelper.subString(svgRect, 5, 7), 
+                    "' width='", WojekHelper.subString(svgRect, 7, 9), 
+                    "' height='", WojekHelper.subString(svgRect, 9, 11), 
                     "'/>"
                 ));
             }
@@ -239,7 +259,7 @@ contract Wojek is ERC721, Ownable
         {
             uint256 attributeIndex = WojekHelper.splitHash(hash, _hashLength, i);
 
-            if(WojekHelper.stringLength(_attributes[i][attributeIndex].svg) > 0)
+            if(_attributes[i][attributeIndex].svg.length > 0)
             {
                 metadata = string(abi.encodePacked
                 (
