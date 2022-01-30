@@ -1,0 +1,9 @@
+#https://stackoverflow.com/questions/25423141/what-exactly-does-the-multiv-options-in-htaccess
+<IfModule mod_negotiation.c>
+    Options -MultiViews
+</IfModule>
+
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^([^\.]+)$ $1.html [NC,L]

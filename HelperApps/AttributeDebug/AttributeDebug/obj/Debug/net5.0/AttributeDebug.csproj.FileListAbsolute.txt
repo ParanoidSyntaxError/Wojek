@@ -1,0 +1,16 @@
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\bin\Debug\net5.0\AttributeDebug.exe
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\bin\Debug\net5.0\AttributeDebug.deps.json
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\bin\Debug\net5.0\AttributeDebug.runtimeconfig.json
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\bin\Debug\net5.0\AttributeDebug.runtimeconfig.dev.json
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\bin\Debug\net5.0\AttributeDebug.dll
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\bin\Debug\net5.0\ref\AttributeDebug.dll
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\bin\Debug\net5.0\AttributeDebug.pdb
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\obj\Debug\net5.0\AttributeDebug.csproj.AssemblyReference.cache
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\obj\Debug\net5.0\AttributeDebug.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\obj\Debug\net5.0\AttributeDebug.AssemblyInfoInputs.cache
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\obj\Debug\net5.0\AttributeDebug.AssemblyInfo.cs
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\obj\Debug\net5.0\AttributeDebug.csproj.CoreCompileInputs.cache
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\obj\Debug\net5.0\AttributeDebug.dll
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\obj\Debug\net5.0\ref\AttributeDebug.dll
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\obj\Debug\net5.0\AttributeDebug.pdb
+C:\Users\John\Desktop\AttributeDebug\AttributeDebug\obj\Debug\net5.0\AttributeDebug.genruntimeconfig.cache

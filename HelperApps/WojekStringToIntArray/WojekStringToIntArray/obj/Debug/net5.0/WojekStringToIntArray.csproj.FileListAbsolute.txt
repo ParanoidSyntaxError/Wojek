@@ -1,0 +1,16 @@
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\bin\Debug\net5.0\WojekStringToIntArray.exe
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\bin\Debug\net5.0\WojekStringToIntArray.deps.json
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\bin\Debug\net5.0\WojekStringToIntArray.runtimeconfig.json
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\bin\Debug\net5.0\WojekStringToIntArray.runtimeconfig.dev.json
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\bin\Debug\net5.0\WojekStringToIntArray.dll
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\bin\Debug\net5.0\ref\WojekStringToIntArray.dll
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\bin\Debug\net5.0\WojekStringToIntArray.pdb
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\obj\Debug\net5.0\WojekStringToIntArray.csproj.AssemblyReference.cache
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\obj\Debug\net5.0\WojekStringToIntArray.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\obj\Debug\net5.0\WojekStringToIntArray.AssemblyInfoInputs.cache
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\obj\Debug\net5.0\WojekStringToIntArray.AssemblyInfo.cs
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\obj\Debug\net5.0\WojekStringToIntArray.csproj.CoreCompileInputs.cache
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\obj\Debug\net5.0\WojekStringToIntArray.dll
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\obj\Debug\net5.0\ref\WojekStringToIntArray.dll
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\obj\Debug\net5.0\WojekStringToIntArray.pdb
+C:\Users\John\Desktop\WojekStringToIntArray\WojekStringToIntArray\obj\Debug\net5.0\WojekStringToIntArray.genruntimeconfig.cache

@@ -1,0 +1,16 @@
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\bin\Debug\net5.0\WojekUpgradeSVG.exe
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\bin\Debug\net5.0\WojekUpgradeSVG.deps.json
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\bin\Debug\net5.0\WojekUpgradeSVG.runtimeconfig.json
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\bin\Debug\net5.0\WojekUpgradeSVG.runtimeconfig.dev.json
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\bin\Debug\net5.0\WojekUpgradeSVG.dll
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\bin\Debug\net5.0\ref\WojekUpgradeSVG.dll
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\bin\Debug\net5.0\WojekUpgradeSVG.pdb
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\obj\Debug\net5.0\WojekUpgradeSVG.csproj.AssemblyReference.cache
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\obj\Debug\net5.0\WojekUpgradeSVG.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\obj\Debug\net5.0\WojekUpgradeSVG.AssemblyInfoInputs.cache
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\obj\Debug\net5.0\WojekUpgradeSVG.AssemblyInfo.cs
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\obj\Debug\net5.0\WojekUpgradeSVG.csproj.CoreCompileInputs.cache
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\obj\Debug\net5.0\WojekUpgradeSVG.dll
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\obj\Debug\net5.0\ref\WojekUpgradeSVG.dll
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\obj\Debug\net5.0\WojekUpgradeSVG.pdb
+C:\Users\John\Desktop\WojekUpgradeSVG\WojekUpgradeSVG\obj\Debug\net5.0\WojekUpgradeSVG.genruntimeconfig.cache
