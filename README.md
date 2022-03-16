@@ -2,7 +2,7 @@
 
 A fully onchain Ethereum NFT collection, 10K max supply. feelsgoodman
 
-![Wojek](https://user-images.githubusercontent.com/71923508/158595303-92198627-1935-42c1-9ef4-8bcc3bcd24ec.png)
+![WojekSmall](https://user-images.githubusercontent.com/71923508/158595445-bc63eaaf-e048-4f0e-a49d-7052d8fe8f23.png)
 
 https://wojek.net/
 
