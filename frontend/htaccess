@@ -1,0 +1,13 @@
+#https://stackoverflow.com/questions/25423141/what-exactly-does-the-multiv-options-in-htaccess
+Options -MultiViews
+
+RewriteEngine on
+
+# Remove .html (or htm) from visible URL (permanent redirect)
+RewriteCond %{REQUEST_URI} ^/(.+)\.html?$ [nocase]
+RewriteRule ^ /%1 [L,R=301]
+
+# Quietly point back to the HTML file (temporary/undefined redirect):
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^ %{REQUEST_URI}.html [END]
